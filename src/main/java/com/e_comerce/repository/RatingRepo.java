@@ -1,7 +1,7 @@
 package com.e_comerce.repository;
 
 import com.e_comerce.model.rating;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RatingRepo extends CrudRepository<rating, Long> {
+public interface RatingRepo extends JpaRepository<rating, Long> {
 }

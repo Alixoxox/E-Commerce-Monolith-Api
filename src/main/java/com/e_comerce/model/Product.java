@@ -17,7 +17,10 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String title;
+
     private String description;
     private category category;
     private String image;
@@ -29,9 +32,6 @@ public class Product {
 
     @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
     private List<rating> ratings;
-
-    @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
-    private List<Cart> cartEntries;
 
     @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
     private List<OrderItems> orderItems;

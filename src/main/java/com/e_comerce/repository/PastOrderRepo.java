@@ -1,7 +1,7 @@
 package com.e_comerce.repository;
 
 import com.e_comerce.model.PastOrders;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PastOrderRepo extends CrudRepository<PastOrders, Long> {
+public interface PastOrderRepo extends JpaRepository<PastOrders, Long> {
 }

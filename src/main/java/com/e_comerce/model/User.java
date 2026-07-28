@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,15 +20,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private LocalDateTime created_at;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<rating> ratings;
-
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
-    private List<Cart> cartItems;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<wishlist> wishlistItems;
