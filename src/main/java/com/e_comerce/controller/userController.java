@@ -15,8 +15,6 @@ public class userController {
     @Autowired
     private UserService US;
 
-    @Autowired
-    private UserDto UD;
     @GetMapping("all")
     public Object GetAllUsers(){
         try {

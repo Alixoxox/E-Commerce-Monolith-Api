@@ -23,7 +23,7 @@ public class wishlist {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product productId;
+    private Product product;
 
     private LocalDateTime addedAt;
 

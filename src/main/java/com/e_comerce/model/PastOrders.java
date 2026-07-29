@@ -28,6 +28,7 @@ public class PastOrders {
 
     private BigDecimal totalAmount;
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @OneToMany(mappedBy = "pastOrder", cascade = CascadeType.ALL)

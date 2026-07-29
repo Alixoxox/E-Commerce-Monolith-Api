@@ -25,5 +25,5 @@ public class rating {
     private User user;
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product productId;
+    private Product product;
 }

@@ -1,9 +1,6 @@
 package com.e_comerce.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Date;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,9 +22,9 @@ public class OrderItems {
 
     @ManyToOne
     @JoinColumn(name="product_id")
-    private Product productId;
+    private Product product;
 
-    private BigDecimal quantity;
+    private Integer quantity;
 
-    private LocalDateTime priceAtPurchase;
+    private BigDecimal priceAtPurchase;
 }

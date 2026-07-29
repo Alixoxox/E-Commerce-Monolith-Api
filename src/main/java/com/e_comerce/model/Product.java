@@ -22,17 +22,20 @@ public class Product {
     private String title;
 
     private String description;
+
+    @Enumerated(EnumType.STRING)
     private category category;
+
     private String image;
-    private int stock;
+    private Integer stock;
     private BigDecimal price;
 
-    @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<wishlist> wishlistedBy;
 
-    @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<rating> ratings;
 
-    @OneToMany(mappedBy = "productId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<OrderItems> orderItems;
 }
