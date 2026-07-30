@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.e_comerce.model.Product;
-import com.e_comerce.model.enums.category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +14,7 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     List<String> GetCategory();
 
     @Query("SELECT p from Product p where p.category = :cat")
-    List<Product> GetProdCategories(@Param("category") category cat);
+    List<Product> GetProdCategories(@Param("cat") String cat);
 
     List<ProductPriceView> findByIdIn(Collection<Long> ids);
 

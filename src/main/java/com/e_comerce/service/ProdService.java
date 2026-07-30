@@ -2,7 +2,6 @@ package com.e_comerce.service;
 import java.util.List;
 import java.util.Optional;
 import com.e_comerce.model.Product;
-import com.e_comerce.model.enums.category;
 import com.e_comerce.repository.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,10 +33,11 @@ public class ProdService {
             throw new RuntimeException("No Categories Found");
         }
     }
-    public List<Product> ProdsByCategory(category cat){
+    public List<Product> ProdsByCategory(String cat){
         try{
            return PR.GetProdCategories(cat);
         }catch(Exception e){
+            System.out.println(e);
             throw new RuntimeException("No products found.");
         }
     }

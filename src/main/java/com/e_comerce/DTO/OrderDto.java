@@ -13,4 +13,10 @@ public class OrderDto {
         private Long id;
         private Integer quantity;
     }
+    @Data
+    @NoArgsConstructor
+    public static class RateProd{
+        private Long productId;
+        private Integer rating;
+    }
 }

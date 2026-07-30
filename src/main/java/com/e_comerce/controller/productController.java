@@ -1,14 +1,13 @@
 package com.e_comerce.controller;
-
 import java.util.List;
 import java.util.Optional;
-
 import com.e_comerce.model.Product;
-import com.e_comerce.model.enums.category;
 import com.e_comerce.service.ProdService;
+import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +16,8 @@ public class productController {
 
     @Autowired
     private ProdService PS;
+    @Autowired
+    private UserService us;
 
     @GetMapping("all")
     public Object GetAllProducts(
@@ -29,10 +30,10 @@ public class productController {
         }
     }
 
-    @GetMapping("{id}")
-    public Object GetOneProduct(@PathVariable Long id){
+    @GetMapping("{productId}")
+    public Object GetOneProduct(@PathVariable Long productId){
         try{
-            Optional<Product> prod= PS.getOneProd(id);
+            Optional<Product> prod= PS.getOneProd(productId);
             return ResponseEntity.accepted().body(prod);
         }catch (Exception err){
             return ResponseEntity.badRequest().body(err.getMessage());
@@ -50,13 +51,23 @@ public class productController {
     }
 
     @GetMapping("category/{category}")
-    public Object GetCategoryProduct(@PathVariable category cat){
+    public Object GetCategoryProduct(@PathVariable String category){
         try{
-            List<Product> prod= PS.ProdsByCategory(cat);
+            System.out.println(category);
+            List<Product> prod= PS.ProdsByCategory(category);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(prod);
         }catch(Exception e){
+            System.out.println(e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    @GetMapping("fetch/rating/{productId}")
+    public Object FetchProductRating(@PathVariable Long productId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(us.GetProdRating(productId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //everyone's ratings comutative and comment section wrt product
 }

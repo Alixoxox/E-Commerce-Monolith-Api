@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.e_comerce.model.enums.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +24,7 @@ public class PastOrders {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
     private LocalDateTime orderDate;
@@ -32,5 +35,6 @@ public class PastOrders {
     private OrderStatus status;
 
     @OneToMany(mappedBy = "pastOrder", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<OrderItems> orderItems;
 }

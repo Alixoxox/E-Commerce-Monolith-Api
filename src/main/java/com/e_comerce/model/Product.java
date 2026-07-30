@@ -3,7 +3,7 @@ package com.e_comerce.model;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.e_comerce.model.enums.category;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,19 +23,21 @@ public class Product {
 
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    private category category;
+    private String category;
 
     private String image;
     private Integer stock;
     private BigDecimal price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<wishlist> wishlistedBy;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<rating> ratings;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<OrderItems> orderItems;
 }
