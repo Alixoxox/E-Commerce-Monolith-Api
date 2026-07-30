@@ -25,7 +25,7 @@ public class productController {
         try {
             return ResponseEntity.ok(PS.getProducts(page,size));
         }catch(Exception err){
-            return ResponseEntity.badRequest();
+            return ResponseEntity.badRequest().body(err.getMessage());
         }
     }
 
@@ -35,7 +35,7 @@ public class productController {
             Optional<Product> prod= PS.getOneProd(id);
             return ResponseEntity.accepted().body(prod);
         }catch (Exception err){
-            return ResponseEntity.badRequest().body(err);
+            return ResponseEntity.badRequest().body(err.getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ public class productController {
             List<String> x= PS.getCategories();
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(x);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -55,7 +55,7 @@ public class productController {
             List<Product> prod= PS.ProdsByCategory(cat);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(prod);
         }catch(Exception e){
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

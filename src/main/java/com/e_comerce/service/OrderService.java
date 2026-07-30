@@ -95,8 +95,7 @@ public PastOrders createOrder(List<OrderDto.Item> prods, Long userId) {
     }
 
     public List<OrderItems> OrderHistoryProducts(Long userId,Long HistoryId){
-    User user=entityManager.getReference(User.class,userId);
-    return OPR.findByIdAndUser(HistoryId, user);
+    return OPR.findByIdAndUser(HistoryId, userId);
     }
 
 }

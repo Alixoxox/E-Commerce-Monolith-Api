@@ -1,5 +1,6 @@
 package com.e_comerce.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.e_comerce.DTO.UserDto;
@@ -24,26 +25,27 @@ public class UserService {
         //instantiate new User
         try {
             String HashedPass= passwordEncoder.encode(UDR.getPassword());
-            User userM = new User(null, UDR.getName(), UDR.getEmail(), HashedPass, null, null, null, null);
+            User userM = new User(null, UDR.getName(), UDR.getEmail(), HashedPass, LocalDateTime.now(), null, null, null);
             return UR.save(userM);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to Create User\nTry Again Later.");
+            throw new RuntimeException("Email already exists.\nTry Another One!");
         }
     }
     public User LoginUser(UserDto.Login UDR){
         try{
-            String pass=passwordEncoder.encode(UDR.getPassword());
+
             User userM= UR.findByEmailPassCustom(UDR.getEmail());
+
             if(userM==null){
                 throw new RuntimeException("Email Not Found");
             }
-            boolean x = passwordEncoder.matches(pass, userM.getPassword());
+            boolean x = passwordEncoder.matches(UDR.getPassword(), userM.getPassword()); //hashes internally
             if(!x){
                 throw new RuntimeException("Password does not match\nTry Again");
             }
             return userM;
         } catch (Exception e) {
-            throw new RuntimeException("Incorrect Credentials.\nTry Again");
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

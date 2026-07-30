@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 public interface PastOrderRepo extends JpaRepository<PastOrders, Long> {
     Page<PastOrders> findByUserId(User user, Pageable pageable);
 
-    @Query("SELECT o FROM PastOrders o JOIN FETCH o.orderItems oi JOIN FETCH oi.product WHERE o.id = :HistoryId AND o.user = :user")
-    List<OrderItems> findByIdAndUser(@Param("HistoryId") Long HistoryId, @Param("user") User user);
+    @Query("SELECT o FROM PastOrders o JOIN FETCH o.orderItems oi JOIN FETCH oi.product WHERE o.id = :HistoryId AND o.user.id = :user")
+    List<OrderItems> findByIdAndUser(@Param("HistoryId") Long HistoryId, @Param("user") Long user);
 
 }

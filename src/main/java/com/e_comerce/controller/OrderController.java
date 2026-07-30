@@ -58,7 +58,7 @@ public class OrderController {
             PastOrders history= OS.createOrder(prodsBuy, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

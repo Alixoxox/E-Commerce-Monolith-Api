@@ -1,15 +1,9 @@
 package com.e_comerce.service;
-
-import javax.naming.InsufficientResourcesException;
 import java.util.List;
 import java.util.Optional;
-
-import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.enums.category;
 import com.e_comerce.repository.ProductRepo;
-import jakarta.transaction.Transactional;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
