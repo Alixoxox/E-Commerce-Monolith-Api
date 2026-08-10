@@ -66,7 +66,7 @@ public Object LoginUser(UserDto.Login UDR) {
 
     String token = jwtService.generateToken(user.getEmail(), user.getId());
     UserDto.UserSummaryDto summary = new UserDto.UserSummaryDto(user.getId(), user.getName(), user.getEmail());
-    return Map.of("token", token, "userData", summary);
+    return Map.of("Token", token, "UserData", summary);
 }
     @SneakyThrows
     public rating RateProduct(Long userId, Long productId, Integer stars){

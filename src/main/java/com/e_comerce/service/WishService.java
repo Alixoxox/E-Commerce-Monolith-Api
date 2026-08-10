@@ -29,14 +29,16 @@ public class WishService {
     @SneakyThrows
     @Transactional
     public void MarkWish(Long userId,Long productId){
-       Optional<UserDto.UserSummaryDto> x= wishRepo.existsByUserIdAndProductId(userId, productId);
-        if (x.isEmpty()) {
-        return; // already wishlisted, nothing to do —> idempotent
-    }
-       User user=entityManager.getReference(User.class,userId);
+        if (wishRepo.existsByUser_IdAndProduct_Id(userId, productId)) {
+            wishRepo.deleteByUser_IdAndProduct_Id(userId, productId);
+            System.out.println("Unwished");
+            return;
+        }
+        User user=entityManager.getReference(User.class,userId);
         Product prod=entityManager.getReference(Product.class,productId);
         wishlist wish=new wishlist(null,user,prod, LocalDateTime.now());
         wishRepo.save(wish);
+        System.out.println("wished for it");
     }
 
     public List<wishlist> GetWishes(Long UserId){

@@ -1,7 +1,11 @@
 package com.e_comerce.service;
 import java.util.List;
 import java.util.Optional;
+
+import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
+import com.e_comerce.model.enums.OrderStatus;
+import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,4 +45,11 @@ public class ProdService {
             throw new RuntimeException("No products found.");
         }
     }
-}
+
+    @Autowired
+    private PastOrderRepo por;
+    public Boolean updateItemStatus(Long OrderId, OrderStatus status){
+        return por.updateOrderStatus(status, OrderId);
+    }
+
+    }

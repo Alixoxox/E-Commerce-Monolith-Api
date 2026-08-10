@@ -46,6 +46,7 @@ public class userController {
         try {
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             ws.MarkWish(userId, productId);
+
             return ResponseEntity.status(HttpStatus.CREATED).body("Product Marked");
         }catch (Exception e){
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
@@ -57,7 +58,6 @@ public class userController {
     public Object FetchWishlist(){
         try {
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
             List<wishlist> wishes= ws.GetWishes(userId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(wishes);
         }catch (Exception e){
@@ -75,4 +75,6 @@ public class userController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    // user receives email after bought
 }

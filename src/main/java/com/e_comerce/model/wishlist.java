@@ -23,6 +23,10 @@ public class wishlist {
     @JsonBackReference
     private User user;
 
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
