@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,16 +26,24 @@ public class PastOrders {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
+    @ToString.Exclude
     private User user;
 
     private LocalDateTime orderDate;
 
     private BigDecimal totalAmount;
 
+    private String phoneNumber;
+    private String city;
+    private String country;
+    private String postalCode;
+    private String address;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @OneToMany(mappedBy = "pastOrder", cascade = CascadeType.ALL)
     @JsonManagedReference
+    @ToString.Exclude
     private List<OrderItems> orderItems;
 }

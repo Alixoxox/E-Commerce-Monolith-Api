@@ -14,14 +14,17 @@ import com.e_comerce.repository.RatingRepo;
 import com.e_comerce.repository.UserRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-
+    @Autowired
+    private S3Service s3Service;
     @Autowired
     private UserRepo UR;
     @Autowired
@@ -69,10 +72,10 @@ public Object LoginUser(UserDto.Login UDR) {
     return Map.of("Token", token, "UserData", summary);
 }
     @SneakyThrows
-    public rating RateProduct(Long userId, Long productId, Integer stars){
+    public rating RateProduct(Long userId, Long productId, Integer stars, String Comment, String Url){
         User user=entityManager.getReference(User.class,userId);
         Product prod=entityManager.getReference(Product.class,productId);
-        rating rate= new rating(null, stars, null, LocalDateTime.now(),user,prod);
+        rating rate= new rating(null,stars,Comment,LocalDateTime.now(),Url,user,prod);
         return rp.save(rate);
     }
 
@@ -82,4 +85,31 @@ public Object LoginUser(UserDto.Login UDR) {
         return Math.round(x * 10) / 10.0; // 1 decimal place
     }
 
+    public List<OrderDto.FeedbackDto> GetProductFeedback(Long productId) {
+        return rp.findByProductIdOrderByCreatedAtDesc(productId).stream()
+                .map(r -> new OrderDto.FeedbackDto(
+                        r.getId(),
+                        r.getValue(),
+                        r.getComment(),
+                        r.getCreatedAt(),
+                        r.getFeedbackImage() !=null ?
+                        s3Service.getPresignedUrlByUrl(r.getFeedbackImage())
+                        : null,
+                        r.getUser().getName(),
+                        r.getUser().getId()))
+                .toList();
+    }
+    @Transactional
+    public boolean RemoveRating(Long ratingId) {
+        Optional<rating> x = rp.findById(ratingId);
+        if (x.isPresent()) {
+            rating rating = x.get();
+            if (rating.getFeedbackImage() != null) {
+                s3Service.deleteImageByUrl(rating.getFeedbackImage());
+            }
+            rp.deleteById(ratingId);
+            return true;
+        }
+        return false;
+    }
 }

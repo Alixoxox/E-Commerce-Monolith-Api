@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,11 +22,13 @@ public class OrderItems {
     @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonBackReference
+    @ToString.Exclude
     private PastOrders pastOrder;
 
     @ManyToOne
     @JoinColumn(name="product_id")
     @JsonBackReference
+    @ToString.Exclude
     private Product product;
 
     private Integer quantity;

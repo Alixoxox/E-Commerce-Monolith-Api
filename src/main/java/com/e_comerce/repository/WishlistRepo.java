@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface WishlistRepo extends JpaRepository<wishlist,Long> {
-    @Query("Select p from wishlist w join product p where w.user.id = :user ")
+    @Query("Select w from wishlist w where w.user.id = :user ")
     List<wishlist> GetWishes(@Param("user") Long user);
 
    boolean existsByUser_IdAndProduct_Id(@Param("userId") Long userId, @Param("productId") Long productId);

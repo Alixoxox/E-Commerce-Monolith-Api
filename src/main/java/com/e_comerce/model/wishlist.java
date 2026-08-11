@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +22,7 @@ public class wishlist {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
+    @ToString.Exclude
     private User user;
 
     public Long getUserId() {
@@ -30,8 +32,12 @@ public class wishlist {
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
+    @ToString.Exclude
     private Product product;
 
+    public Long getProductId() {
+        return product != null ? product.getId() : null;
+    }
     private LocalDateTime addedAt;
 
 }

@@ -2,6 +2,7 @@ package com.e_comerce.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.e_comerce.DTO.ProductSummary;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.enums.OrderStatus;
@@ -19,9 +20,9 @@ public class ProdService {
     @Autowired
     private ProductRepo PR;
 
-    public Page<Product> getProducts(int page,int size) {
+    public Page<ProductSummary> getProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return PR.findAll(pageable);
+        return PR.getSummary(pageable);
     }
     public Optional<Product> getOneProd(Long id){
         Optional<Product> prod =PR.findById(id);

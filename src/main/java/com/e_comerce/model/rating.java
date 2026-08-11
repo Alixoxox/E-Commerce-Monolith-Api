@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,14 +21,16 @@ public class rating {
     private Integer value;
     private String comment;
     private LocalDateTime createdAt;
-
+    private String feedbackImage;
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
+    @ToString.Exclude
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     @JsonBackReference
+    @ToString.Exclude
     private Product product;
 }

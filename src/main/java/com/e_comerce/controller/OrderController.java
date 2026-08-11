@@ -48,14 +48,12 @@ public class OrderController {
     }
 
     @PostMapping("purchase")
-    public Object BuyItems(@RequestBody List<OrderDto.Item> prodsBuy){
+    public Object BuyItems(@RequestBody OrderDto.Checkout prodsBuy){
         try{
-            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 1 stores the final to the pastOrders
-            PastOrders history= OS.createOrder(prodsBuy, userId);
+            PastOrders history= OS.createOrder(prodsBuy);
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+           return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

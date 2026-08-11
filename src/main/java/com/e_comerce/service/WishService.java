@@ -40,8 +40,9 @@ public class WishService {
         wishRepo.save(wish);
         System.out.println("wished for it");
     }
-
+    @SneakyThrows
     public List<wishlist> GetWishes(Long UserId){
-        return wishRepo.GetWishes(UserId);
+        List<wishlist> wishing =wishRepo.GetWishes(UserId);
+        return wishing;
     }
 }

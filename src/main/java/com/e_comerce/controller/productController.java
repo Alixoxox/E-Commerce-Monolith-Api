@@ -7,6 +7,7 @@ import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +27,7 @@ public class productController {
             return ResponseEntity.ok(PS.getProducts(page,size));
         }catch(Exception err){
             return ResponseEntity.badRequest().body(err.getMessage());
-        }
+        }   
     }
 
     @GetMapping("{productId}")
@@ -48,7 +49,7 @@ public class productController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    //related prods
     @GetMapping("category/{category}")
     public Object GetCategoryProduct(@PathVariable String category){
         try{
@@ -64,6 +65,15 @@ public class productController {
     public Object FetchProductRating(@PathVariable Long productId){
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(us.GetProdRating(productId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("ratings/{productId}")
+    public Object FetchProductFeedback(@PathVariable Long productId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(us.GetProductFeedback(productId));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

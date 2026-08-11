@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,12 +39,13 @@ public class OrderService {
 
 @SneakyThrows
 @Transactional
-public PastOrders createOrder(List<OrderDto.Item> prods, Long userId) {
+public PastOrders createOrder(OrderDto.Checkout prods) {
+    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
     List<Long> ids = new ArrayList<>();
     Map<Long, Integer> qty = new HashMap<>();
 
-    for (OrderDto.Item item : prods) {
+    for (OrderDto.Item item : prods.getProducts()) {
         ids.add(item.getId());
         qty.put(item.getId(), item.getQuantity());
     }
@@ -56,10 +58,7 @@ public PastOrders createOrder(List<OrderDto.Item> prods, Long userId) {
 
     User user = entityManager.getReference(User.class, userId);
 
-    PastOrders pastOrders = new PastOrders();
-    pastOrders.setUser(user);
-    pastOrders.setOrderDate(LocalDateTime.now());
-    pastOrders.setStatus(OrderStatus.PENDING);
+    PastOrders pastOrders = new PastOrders(null,user,LocalDateTime.now(),null,prods.getPhoneNumber(),prods.getCity(),prods.getCountry(),prods.getPostalCode(),prods.getAddress(),OrderStatus.PENDING,null);
 
     List<OrderItems> items = new ArrayList<>();
     BigDecimal totalAmount = BigDecimal.ZERO;
@@ -67,11 +66,11 @@ public PastOrders createOrder(List<OrderDto.Item> prods, Long userId) {
     for (ProductPriceView p : priceInfo) {
         int q = qty.get(p.getId());
 
-        if (Pr.decrementStock(p.getId(), q) == 0) {
-            throw new InsufficientResourcesException("Not enough stock for product " + p.getId());
-        }
-
         Product productRef = entityManager.getReference(Product.class, p.getId());
+
+        if (Pr.decrementStock(p.getId(), q) == 0) {
+            throw new RuntimeException("Not enough stock for Product " + productRef.getTitle());
+        }
 
         OrderItems item = new OrderItems();
         item.setPastOrder(pastOrders);   // links each item back to this order

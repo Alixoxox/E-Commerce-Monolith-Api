@@ -7,11 +7,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
+import com.e_comerce.model.User;
+import com.e_comerce.model.enums.OrderStatus;
+import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.ProductRepo;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +29,10 @@ public class AdminSevice {
 
     @Autowired
     private ProductRepo productRepository;
+    @Autowired
+    private PastOrderRepo pastOrderRepo;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @SneakyThrows
     @Transactional
@@ -102,5 +112,11 @@ public class AdminSevice {
 
         productRepository.saveAll(products);
         return "Products Successfully uploaded to the Database";
+    }
+    @SneakyThrows
+    public void changeOrderStatus(OrderStatus status, Long OrderId){
+       PastOrders po =entityManager.getReference(PastOrders.class,OrderId);
+       po.setStatus(status);
+       pastOrderRepo.save(po);
     }
 }
