@@ -2,22 +2,22 @@ package com.e_comerce.repository;
 
 import java.util.List;
 
-import com.e_comerce.model.OrderItems;
+import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
-import com.e_comerce.model.User;
 import com.e_comerce.model.enums.OrderStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import com.e_comerce.DTO.UserDto.UserOrderItemHist;
+
 
 public interface PastOrderRepo extends JpaRepository<PastOrders, Long> {
-    Page<PastOrders> findByUserId(User user, Pageable pageable);
+    @Query("SELECT new com.e_comerce.DTO.UserDto$UserOrderHist(p.id, p.orderDate, p.totalAmount, p.phoneNumber, p.city, p.country, p.postalCode, p.address, p.status) FROM PastOrders p WHERE p.user.id = :userId")
+    List<UserDto.UserOrderHist> findByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT o FROM PastOrders o JOIN FETCH o.orderItems oi JOIN FETCH oi.product WHERE o.id = :HistoryId AND o.user.id = :user")
-    List<OrderItems> findByIdAndUser(@Param("HistoryId") Long HistoryId, @Param("user") Long user);
+    @Query("SELECT new com.e_comerce.DTO.UserDto$UserOrderItemHist(o.product.id,o.product.title, o.product.image,o.product.category,o.quantity,o.priceAtPurchase) FROM OrderItems o WHERE o.pastOrder.id = :historyId")
+    List<UserOrderItemHist> findOrderItemRaw(@Param("historyId") Long historyId);
 
     @Modifying
     @Query("Update PastOrders p Set p.status = status where p.id = :id")

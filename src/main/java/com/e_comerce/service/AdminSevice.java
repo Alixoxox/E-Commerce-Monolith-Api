@@ -9,7 +9,6 @@ import java.util.List;
 
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
-import com.e_comerce.model.User;
 import com.e_comerce.model.enums.OrderStatus;
 import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.ProductRepo;

@@ -1,11 +1,7 @@
 package com.e_comerce.service;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
-import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
 import com.e_comerce.model.wishlist;
@@ -22,7 +18,6 @@ public class WishService {
 
     @Autowired
     private WishlistRepo wishRepo;
-
     @PersistenceContext
     private EntityManager entityManager;
 

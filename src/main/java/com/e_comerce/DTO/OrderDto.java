@@ -1,11 +1,7 @@
 package com.e_comerce.DTO;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.e_comerce.model.Product;
-import com.e_comerce.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

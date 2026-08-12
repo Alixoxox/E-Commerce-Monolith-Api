@@ -3,7 +3,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.e_comerce.DTO.ProductSummary;
-import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.enums.OrderStatus;
 import com.e_comerce.repository.PastOrderRepo;

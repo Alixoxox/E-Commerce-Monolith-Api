@@ -1,12 +1,9 @@
 package com.e_comerce.controller;
 
-import java.awt.print.Pageable;
-
 import com.e_comerce.model.enums.OrderStatus;
 import com.e_comerce.service.AdminSevice;
 import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

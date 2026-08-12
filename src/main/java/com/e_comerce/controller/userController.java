@@ -41,7 +41,6 @@ public class userController {
         try{
             System.out.print(UDLog);
             Object data = US.LoginUser(UDLog);
-            System.out.println(data);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
         } catch (Exception e) {
 

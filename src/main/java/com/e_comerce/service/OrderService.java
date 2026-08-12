@@ -1,10 +1,10 @@
 package com.e_comerce.service;
 
-import javax.naming.InsufficientResourcesException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import com.e_comerce.DTO.OrderDto;
+import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.OrderItems;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
@@ -19,8 +19,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -88,13 +86,12 @@ public PastOrders createOrder(OrderDto.Checkout prods) {
     return OPR.save(pastOrders); // cascades and saves everything in one go
     }
 
-    public Page<PastOrders> GetHistory(Long userId, Pageable page){
-    User user=entityManager.getReference(User.class,userId);
-    return OPR.findByUserId(user,page);
+    public List<UserDto.UserOrderHist> GetHistory(Long userId){
+    return OPR.findByUserId(userId);
     }
 
-    public List<OrderItems> OrderHistoryProducts(Long userId,Long HistoryId){
-    return OPR.findByIdAndUser(HistoryId, userId);
+    public List<UserDto.UserOrderItemHist> OrderHistoryProducts(Long HistoryId){
+    return OPR.findOrderItemRaw(HistoryId);
     }
 
 }

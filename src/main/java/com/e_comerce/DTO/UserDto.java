@@ -1,5 +1,11 @@
 package com.e_comerce.DTO;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import com.e_comerce.model.enums.OrderStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,5 +29,31 @@ public class UserDto {
         private Long id;
         private String name;
         private String email;
+    }
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UserOrderItemHist{
+        private Long id;
+        private String title;
+        private String image;
+        private String category;
+        private Integer quantity;
+        private BigDecimal priceAtPurchase;
+    }
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UserOrderHist{
+        private Long id;
+        private LocalDateTime orderDate;
+        private BigDecimal totalAmount;
+        private String phoneNumber;
+        private String city;
+        private String country;
+        private String postalCode;
+        private String address;
+        @Enumerated(EnumType.STRING)
+        private OrderStatus status;
     }
 }
