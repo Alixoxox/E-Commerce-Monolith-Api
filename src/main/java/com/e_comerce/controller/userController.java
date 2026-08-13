@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
+import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.model.wishlist;
 import com.e_comerce.service.EmailService;
 import com.e_comerce.service.S3Service;
@@ -30,7 +31,7 @@ public class userController {
     @PostMapping("auth/register")
     public Object CreateUser(@RequestBody UserDto.Request UR){
         try{
-            Object UDR = US.CreateUser(UR);
+            Object UDR = US.CreateUser(UR,UserRole.USER);
             return ResponseEntity.status(HttpStatus.CREATED).body(UDR);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -41,7 +42,7 @@ public class userController {
     public Object loginUser(@RequestBody UserDto.Login UDLog){
         try{
             System.out.print(UDLog);
-            Object data = US.LoginUser(UDLog);
+            Object data = US.LoginUser(UDLog, UserRole.USER);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
         } catch (Exception e) {
 

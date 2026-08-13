@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.crypto.SecretKey;
 
+import com.e_comerce.model.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -24,9 +25,10 @@ public class JWTService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email,Long UserId) {
+    public String generateToken(String email, Long UserId, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id",String.valueOf(UserId));
+        claims.put("role",String.valueOf(role));
         return Jwts.builder()
                 .addClaims(claims)
                 .setSubject(email)

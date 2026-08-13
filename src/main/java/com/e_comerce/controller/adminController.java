@@ -1,6 +1,8 @@
 package com.e_comerce.controller;
 
+import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.enums.OrderStatus;
+import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.service.AdminSevice;
 import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,18 @@ public class adminController {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(US.FetchUserData());
         }catch(Exception err){
             return ResponseEntity.badRequest();
+        }
+    }
+
+    // add a seeding script for admin which runs once on startup
+
+    @PostMapping("auth/login")
+    public Object loginUser(@RequestBody UserDto.Login UDLog){
+        try{//here
+            Object data = US.LoginUser(UDLog, UserRole.ADMIN);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
+        } catch (Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

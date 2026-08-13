@@ -11,6 +11,7 @@ import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
+import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.model.rating;
 import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.RatingRepo;
@@ -47,7 +48,7 @@ public class UserService {
         return UR.findAll();
     }
 
-    public Object CreateUser(UserDto.Request UDR) {
+    public Object CreateUser(UserDto.Request UDR,UserRole role) {
         //instantiate new User
         try {
             User userM = new User();
@@ -57,24 +58,25 @@ public class UserService {
             userM.setCreated_at(LocalDateTime.now());
             User user = UR.save(userM);
             UserDto.UserSummaryDto summary = new UserDto.UserSummaryDto(user.getId(), user.getName(), user.getEmail());
-            String token = jwtService.generateToken(userM.getEmail(),user.getId());
+            String token = jwtService.generateToken(userM.getEmail(),user.getId(),role);
             return Map.of("Token",token,"UserData",summary);
         } catch (Exception e) {
             throw new RuntimeException("Email already exists.\nTry Another One!");
         }
     }
-public Object LoginUser(UserDto.Login UDR) {
+public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
 
     User user = UR.findByEmail(UDR.getEmail())
             .orElseThrow(() -> new RuntimeException("Email not found"));
-
+    if(user.getUserRole() != userRole){
+        throw new RuntimeException("You are not Authorized to access this Account");
+    }
     boolean matches = passwordEncoder.matches(UDR.getPassword(), user.getPassword());
 
     if (!matches) {
         throw new RuntimeException("Password does not match. Try again.");
     }
-
-    String token = jwtService.generateToken(user.getEmail(), user.getId());
+    String token = jwtService.generateToken(user.getEmail(), user.getId(),userRole);
     UserDto.UserSummaryDto summary = new UserDto.UserSummaryDto(user.getId(), user.getName(), user.getEmail());
     return Map.of("Token", token, "UserData", summary);
 }
