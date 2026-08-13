@@ -34,4 +34,7 @@ public class OrderItems {
     private Integer quantity;
 
     private BigDecimal priceAtPurchase;
+
+    public BigDecimal getSubtotal() {
+        return priceAtPurchase.multiply(BigDecimal.valueOf(quantity.longValue()));}
 }

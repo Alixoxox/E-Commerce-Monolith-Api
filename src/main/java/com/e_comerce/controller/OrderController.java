@@ -1,12 +1,20 @@
 package com.e_comerce.controller;
 import java.util.List;
+import java.util.Optional;
+
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
+import com.e_comerce.model.User;
+import com.e_comerce.repository.UserRepo;
 import com.e_comerce.service.OrderService;
+import com.e_comerce.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +24,8 @@ public class OrderController {
 
     @Autowired
     OrderService OS;
+    @Autowired
+    UserService us;
 
     @GetMapping("history")
     public Object GetOrdersHistory(){
@@ -38,12 +48,19 @@ public class OrderController {
     }
     }
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @PostMapping("purchase")
     public Object BuyItems(@RequestBody OrderDto.Checkout prodsBuy){
         try{
-            PastOrders history= OS.createOrder(prodsBuy);
+            Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = entityManager.getReference(User.class,userId);
+            PastOrders history= OS.createOrder(prodsBuy,user);
+            // fire and forget mail to customer
+            us.SendOrderReciept(history.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
-        } catch (Exception e) {
+            } catch (Exception e) {
            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

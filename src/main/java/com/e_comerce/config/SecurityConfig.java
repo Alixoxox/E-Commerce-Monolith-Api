@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/users/auth/**").permitAll()
+                    .requestMatchers("/users/auth/**","/users/sendMail").permitAll()
                     .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                     .anyRequest().authenticated()
                 )

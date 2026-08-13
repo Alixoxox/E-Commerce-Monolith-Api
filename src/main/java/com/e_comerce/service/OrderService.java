@@ -1,6 +1,7 @@
 package com.e_comerce.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import com.e_comerce.DTO.OrderDto;
@@ -19,7 +20,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,14 +31,14 @@ public class OrderService {
     private PastOrderRepo OPR;
     @Autowired
     private OrderItemRepo OIR;
-
     @PersistenceContext
     private EntityManager entityManager;
 
+    private static final BigDecimal TAX_RATE = new BigDecimal("0.05"); // 5%
+
 @SneakyThrows
 @Transactional
-public PastOrders createOrder(OrderDto.Checkout prods) {
-    Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+public PastOrders createOrder(OrderDto.Checkout prods, User user) {
 
     List<Long> ids = new ArrayList<>();
     Map<Long, Integer> qty = new HashMap<>();
@@ -54,12 +54,10 @@ public PastOrders createOrder(OrderDto.Checkout prods) {
         throw new RuntimeException("One or more products not found.\nThey might be Out Of Stock.");
     }
 
-    User user = entityManager.getReference(User.class, userId);
-
     PastOrders pastOrders = new PastOrders(null,user,LocalDateTime.now(),null,prods.getPhoneNumber(),prods.getCity(),prods.getCountry(),prods.getPostalCode(),prods.getAddress(),OrderStatus.PENDING,null);
 
     List<OrderItems> items = new ArrayList<>();
-    BigDecimal totalAmount = BigDecimal.ZERO;
+    BigDecimal subTotal = BigDecimal.ZERO;
 
     for (ProductPriceView p : priceInfo) {
         int q = qty.get(p.getId());
@@ -76,11 +74,14 @@ public PastOrders createOrder(OrderDto.Checkout prods) {
         item.setQuantity(q);
         item.setPriceAtPurchase(p.getPrice());
         items.add(item);
-
-        totalAmount = totalAmount.add(p.getPrice().multiply(BigDecimal.valueOf(q)));
+        subTotal = subTotal.add(p.getPrice().multiply(BigDecimal.valueOf(q)));
     }
 
     pastOrders.setOrderItems(items);       // attach the not-yet-saved list here
+
+    BigDecimal taxAmount = subTotal.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
+    BigDecimal totalAmount = subTotal.add(taxAmount);
+
     pastOrders.setTotalAmount(totalAmount);
 
     return OPR.save(pastOrders); // cascades and saves everything in one go

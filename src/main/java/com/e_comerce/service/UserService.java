@@ -1,5 +1,6 @@
 package com.e_comerce.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -7,9 +8,11 @@ import java.util.Optional;
 
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
+import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
 import com.e_comerce.model.rating;
+import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.RatingRepo;
 import com.e_comerce.repository.UserRepo;
 import jakarta.persistence.EntityManager;
@@ -17,6 +20,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +38,10 @@ public class UserService {
     private RatingRepo rp;
     @Autowired
     private JWTService jwtService;
+     @Autowired
+    private EmailService emailService;
+    @Autowired
+    private buildRecieptHtml buildRecieptHtml;
 
     public List<User> FetchUserData() {
         return UR.findAll();
@@ -110,5 +118,15 @@ public Object LoginUser(UserDto.Login UDR) {
             return true;
         }
         return false;
+    }
+    @Autowired
+    private PastOrderRepo pastOrderRepo;
+    @Async
+    @Transactional
+    public void SendOrderReciept(Long historyId) throws IOException {
+      PastOrders order = pastOrderRepo.findById(historyId)
+            .orElseThrow();
+      String html = buildRecieptHtml.build(order);
+      emailService.sendHtmlEmail(order.getUser().getEmail(), "Receipt - MEZN-" + order.getId(), html);
     }
 }

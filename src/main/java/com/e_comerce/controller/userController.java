@@ -5,6 +5,7 @@ import java.util.List;
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.wishlist;
+import com.e_comerce.service.EmailService;
 import com.e_comerce.service.S3Service;
 import com.e_comerce.service.UserService;
 import com.e_comerce.service.WishService;
@@ -101,6 +102,18 @@ public class userController {
             }
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(s);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @Autowired
+    private EmailService emailService;
+    @PostMapping("sendMail")
+    public Object SendMail(@RequestBody UserDto.supportMsg sm){
+        try{
+            emailService.sendSupportMessage(sm.getMail(),sm.getSubject(),sm.getMessage());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("We have received your message and will hear from us soon.");
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

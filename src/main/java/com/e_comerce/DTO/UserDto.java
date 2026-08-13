@@ -56,4 +56,12 @@ public class UserDto {
         @Enumerated(EnumType.STRING)
         private OrderStatus status;
     }
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class supportMsg{
+        private String mail;
+        private String subject;
+        private String message;
+    }
 }
