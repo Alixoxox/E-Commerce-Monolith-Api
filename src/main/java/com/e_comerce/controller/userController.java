@@ -13,6 +13,7 @@ import com.e_comerce.service.WishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,15 +51,23 @@ public class userController {
         }
     }
 
+    @GetMapping("all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Object GetAllUsers(){
+        try{
+            return ResponseEntity.ok(US.GetUserCount());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("mark/wishlist/{productId}")
     public Object MarkWishlist(@PathVariable Long productId){
         try {
-            System.out.println("Here issue");
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             ws.MarkWish(userId, productId);
             return ResponseEntity.status(HttpStatus.CREATED).body("Product Marked");
         }catch (Exception e){
-            System.out.println(e.getStackTrace());
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
@@ -67,12 +76,10 @@ public class userController {
     @GetMapping("watch/wishlist")
     public Object FetchWishlist(){
         try {
-            System.out.println("Seeing Past watching");
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             List<wishlist> wishes= ws.GetWishes(userId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(wishes);
         }catch (Exception e){
-            System.out.println(e);
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
@@ -84,7 +91,6 @@ public class userController {
         try{
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
-
             return ResponseEntity.status(HttpStatus.CREATED).body(US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),URL));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

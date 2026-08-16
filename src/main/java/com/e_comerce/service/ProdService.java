@@ -41,7 +41,6 @@ public class ProdService {
         try{
            return PR.GetProdCategories(cat);
         }catch(Exception e){
-            System.out.println(e);
             throw new RuntimeException("No products found.");
         }
     }

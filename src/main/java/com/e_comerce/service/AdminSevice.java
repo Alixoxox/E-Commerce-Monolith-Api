@@ -4,18 +4,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
-import com.e_comerce.model.User;
-import com.e_comerce.model.enums.OrderStatus;
-import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.ProductRepo;
-import com.e_comerce.repository.UserRepo;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -24,8 +17,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -117,11 +108,5 @@ public class AdminSevice {
 
         productRepository.saveAll(products);
         return "Products Successfully uploaded to the Database";
-    }
-    @SneakyThrows
-    public void changeOrderStatus(OrderStatus status, Long OrderId){
-       PastOrders po =entityManager.getReference(PastOrders.class,OrderId);
-       po.setStatus(status);
-       pastOrderRepo.save(po);
     }
 }

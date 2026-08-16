@@ -43,9 +43,15 @@ public class UserService {
     private EmailService emailService;
     @Autowired
     private buildRecieptHtml buildRecieptHtml;
+    @Autowired
+    private PastOrderRepo pastOrderRepo;
 
     public List<User> FetchUserData() {
         return UR.findAll();
+    }
+
+    public long GetUserCount() {
+        return UR.count();
     }
 
     public Object CreateUser(UserDto.Request UDR,UserRole role) {
@@ -64,8 +70,8 @@ public class UserService {
             throw new RuntimeException("Email already exists.\nTry Another One!");
         }
     }
+    @SneakyThrows
 public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
-
     User user = UR.findByEmail(UDR.getEmail())
             .orElseThrow(() -> new RuntimeException("Email not found"));
     if(user.getUserRole() != userRole){
@@ -121,8 +127,7 @@ public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
         }
         return false;
     }
-    @Autowired
-    private PastOrderRepo pastOrderRepo;
+
     @Async
     @Transactional
     public void SendOrderReciept(Long historyId) throws IOException {

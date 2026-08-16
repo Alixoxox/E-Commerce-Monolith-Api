@@ -59,6 +59,22 @@ public class UserDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class AllOrderHist {
+    private Long id;
+    private LocalDateTime orderDate;
+    private BigDecimal totalAmount;
+    private String phoneNumber;
+    private String city;
+    private String country;
+    private String postalCode;
+    private String address;
+    private OrderStatus status;
+    private String userName;
+    private String email;
+}
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class supportMsg{
         private String mail;
         private String subject;

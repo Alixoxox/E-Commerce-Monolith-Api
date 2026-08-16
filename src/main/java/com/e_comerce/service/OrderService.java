@@ -20,6 +20,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -88,11 +90,26 @@ public PastOrders createOrder(OrderDto.Checkout prods, User user) {
     }
 
     public List<UserDto.UserOrderHist> GetHistory(Long userId){
-    return OPR.findByUserId(userId);
+    return OPR.findOrderByUserId(userId);
+    }
+
+    public Page<UserDto.AllOrderHist> GetAllOrders(int page, int size){
+    PageRequest pageable = PageRequest.of(page, size);
+    return OPR.findAllOrders(pageable);
     }
 
     public List<UserDto.UserOrderItemHist> OrderHistoryProducts(Long HistoryId){
     return OPR.findOrderItemRaw(HistoryId);
+    }
+
+    @Transactional
+    public PastOrders UpdateStatus(Long orderId, OrderStatus status){
+        PastOrders order = entityManager.find(PastOrders.class, orderId);
+        if (order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        order.setStatus(status);
+        return entityManager.merge(order);
     }
 
 }

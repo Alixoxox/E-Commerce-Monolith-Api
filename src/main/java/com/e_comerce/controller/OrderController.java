@@ -1,20 +1,18 @@
 package com.e_comerce.controller;
 import java.util.List;
-import java.util.Optional;
-
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.User;
-import com.e_comerce.repository.UserRepo;
 import com.e_comerce.service.OrderService;
 import com.e_comerce.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +35,18 @@ public class OrderController {
     return ResponseEntity.badRequest().body(e);
     }
     }
-
+    @GetMapping("all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Object GetOrdersHistory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+    try {
+        Page<UserDto.AllOrderHist> History= OS.GetAllOrders(page, size);
+        return ResponseEntity.ok(History);
+    } catch (Exception e) {
+    return ResponseEntity.badRequest().body(e);
+    }
+    }
     @GetMapping("history/bought/{HistoryNo}")
     public Object GetIndividualHistory(@PathVariable Long HistoryNo){
     try {
@@ -46,6 +55,17 @@ public class OrderController {
     } catch (Exception e) {
     return ResponseEntity.badRequest().body("History Of Products Bought could not Be Found");
     }
+    }
+
+    @PutMapping("status/{orderId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Object UpdateOrderStatus(@PathVariable Long orderId, @RequestBody OrderDto.UpdateStatus body){
+        try {
+            PastOrders order = OS.UpdateStatus(orderId, body.getStatus());
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PersistenceContext

@@ -2,6 +2,7 @@ package com.e_comerce.DTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.e_comerce.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,12 @@ public class OrderDto {
         private String feedbackImage;
         private String userName;
         private Long userId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class UpdateStatus{
+        private OrderStatus status;
     }
 
     @Data

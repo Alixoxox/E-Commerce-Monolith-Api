@@ -28,7 +28,7 @@ public class JWTService {
     public String generateToken(String email, Long UserId, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id",String.valueOf(UserId));
-        claims.put("role",String.valueOf(role));
+        claims.put("role",role.name());
         return Jwts.builder()
                 .addClaims(claims)
                 .setSubject(email)

@@ -52,11 +52,9 @@ public class productController {
     @GetMapping("category/{category}")
     public Object GetCategoryProduct(@PathVariable String category){
         try{
-            System.out.println(category);
             List<Product> prod= PS.ProdsByCategory(category);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(prod);
         }catch(Exception e){
-            System.out.println(e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
