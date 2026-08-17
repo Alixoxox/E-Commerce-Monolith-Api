@@ -20,6 +20,9 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,10 @@ public class OrderService {
 
 @SneakyThrows
 @Transactional
+@Caching(evict = {
+    @CacheEvict(value = "UserOrderHistory", key = "#user.id"),
+    @CacheEvict(value = "AdminOrderListAll", allEntries = true)
+})
 public PastOrders createOrder(OrderDto.Checkout prods, User user) {
 
     List<Long> ids = new ArrayList<>();
@@ -88,16 +95,16 @@ public PastOrders createOrder(OrderDto.Checkout prods, User user) {
 
     return OPR.save(pastOrders); // cascades and saves everything in one go
     }
-
+    @Cacheable(value="UserOrderHistory",key = "#userId")
     public List<UserDto.UserOrderHist> GetHistory(Long userId){
     return OPR.findOrderByUserId(userId);
     }
-
+    @Cacheable(value = "AdminOrderListAll",key="#page + ':' + #size")
     public Page<UserDto.AllOrderHist> GetAllOrders(int page, int size){
     PageRequest pageable = PageRequest.of(page, size);
     return OPR.findAllOrders(pageable);
     }
-
+    @Cacheable(value="OrderHistoryProductsDetail",key = "#HistoryId")
     public List<UserDto.UserOrderItemHist> OrderHistoryProducts(Long HistoryId){
     return OPR.findOrderItemRaw(HistoryId);
     }

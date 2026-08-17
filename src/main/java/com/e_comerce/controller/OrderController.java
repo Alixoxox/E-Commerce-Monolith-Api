@@ -44,6 +44,7 @@ public class OrderController {
         Page<UserDto.AllOrderHist> History= OS.GetAllOrders(page, size);
         return ResponseEntity.ok(History);
     } catch (Exception e) {
+        e.printStackTrace();
     return ResponseEntity.badRequest().body(e);
     }
     }

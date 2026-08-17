@@ -21,6 +21,9 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,10 +49,11 @@ public class UserService {
     @Autowired
     private PastOrderRepo pastOrderRepo;
 
+    @Cacheable("adminUsers")
     public List<User> FetchUserData() {
         return UR.findAll();
     }
-
+    @Cacheable("UserCount")
     public long GetUserCount() {
         return UR.count();
     }
@@ -71,7 +75,7 @@ public class UserService {
         }
     }
     @SneakyThrows
-public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
+    public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
     User user = UR.findByEmail(UDR.getEmail())
             .orElseThrow(() -> new RuntimeException("Email not found"));
     if(user.getUserRole() != userRole){
@@ -95,11 +99,12 @@ public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
     }
 
     @SneakyThrows
+    @Cacheable("prodRating")
     public Double GetProdRating(Long productId){
         Double x= rp.getAvgRating(productId);
         return Math.round(x * 10) / 10.0; // 1 decimal place
     }
-
+    @Cacheable("prodFeedback")
     public List<OrderDto.FeedbackDto> GetProductFeedback(Long productId) {
         return rp.findByProductIdOrderByCreatedAtDesc(productId).stream()
                 .map(r -> new OrderDto.FeedbackDto(
@@ -119,6 +124,7 @@ public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
         Optional<rating> x = rp.findById(ratingId);
         if (x.isPresent()) {
             rating rating = x.get();
+            Long userId = rating.getUser().getId();
             if (rating.getFeedbackImage() != null) {
                 s3Service.deleteImageByUrl(rating.getFeedbackImage());
             }
@@ -128,7 +134,7 @@ public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
         return false;
     }
 
-    @Async
+    @Async //use kafka or rabitMq
     @Transactional
     public void SendOrderReciept(Long historyId) throws IOException {
       PastOrders order = pastOrderRepo.findById(historyId)

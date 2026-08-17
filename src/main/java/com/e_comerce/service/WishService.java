@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,6 +35,7 @@ public class WishService {
         wishRepo.save(wish);
     }
     @SneakyThrows
+    @Cacheable(value = "Wishlist",key = "#UserId")
     public List<wishlist> GetWishes(Long UserId){
         List<wishlist> wishing =wishRepo.GetWishes(UserId);
         return wishing;
