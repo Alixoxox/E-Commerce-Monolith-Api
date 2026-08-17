@@ -21,9 +21,10 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,8 @@ public class UserService {
     private buildRecieptHtml buildRecieptHtml;
     @Autowired
     private PastOrderRepo pastOrderRepo;
+    @Autowired
+    private CacheManager cacheManager;
 
     @Cacheable("adminUsers")
     public List<User> FetchUserData() {
@@ -57,7 +60,7 @@ public class UserService {
     public long GetUserCount() {
         return UR.count();
     }
-
+    @Caching(evict={@CacheEvict("UserCount"), @CacheEvict("adminUsers")})
     public Object CreateUser(UserDto.Request UDR,UserRole role) {
         //instantiate new User
         try {
@@ -91,19 +94,43 @@ public class UserService {
     return Map.of("Token", token, "UserData", summary);
 }
     @SneakyThrows
+    @Caching(evict = {
+            @CacheEvict(value = "prodRating", key = "#productId"),
+            @CacheEvict(value = "prodFeedback", key = "#productId")
+    })
     public rating RateProduct(Long userId, Long productId, Integer stars, String Comment, String Url){
         User user=entityManager.getReference(User.class,userId);
         Product prod=entityManager.getReference(Product.class,productId);
         rating rate= new rating(null,stars,Comment,LocalDateTime.now(),Url,user,prod);
         return rp.save(rate);
     }
+    @SneakyThrows
+    @Caching(evict = {
+            @CacheEvict(value = "prodRating", key = "#productId"),
+            @CacheEvict(value = "prodFeedback", key = "#productId")
+    })
+    public rating EditRateProduct(Long ratingId, Integer stars, String Comment, String Url){
+        rating rate=entityManager.getReference(rating.class,ratingId);
+        if(stars!=null){
+            rate.setValue(stars);
+        }if(Comment != null || !Comment.isBlank()){
+            rate.setComment(Comment);
+        }if(Url !=null || !Url.isBlank()){
+            rate.setFeedbackImage(Url);
+        }
+        Long productId=rate.getProduct().getId();
+        cacheManager.getCache("prodRating").evict(productId);
+        cacheManager.getCache("prodFeedback").evict(productId);
+        return rp.save(rate);
+    }
 
     @SneakyThrows
-    @Cacheable("prodRating")
+    @Cacheable(value="prodRating",key="#productId")
     public Double GetProdRating(Long productId){
         Double x= rp.getAvgRating(productId);
         return Math.round(x * 10) / 10.0; // 1 decimal place
     }
+    @SneakyThrows
     @Cacheable("prodFeedback")
     public List<OrderDto.FeedbackDto> GetProductFeedback(Long productId) {
         return rp.findByProductIdOrderByCreatedAtDesc(productId).stream()
@@ -119,16 +146,19 @@ public class UserService {
                         r.getUser().getId()))
                 .toList();
     }
+    @SneakyThrows
     @Transactional
     public boolean RemoveRating(Long ratingId) {
         Optional<rating> x = rp.findById(ratingId);
         if (x.isPresent()) {
             rating rating = x.get();
-            Long userId = rating.getUser().getId();
+            Long productId= rating.getProduct().getId();
             if (rating.getFeedbackImage() != null) {
                 s3Service.deleteImageByUrl(rating.getFeedbackImage());
             }
             rp.deleteById(ratingId);
+             cacheManager.getCache("prodRating").evict(productId);
+             cacheManager.getCache("prodFeedback").evict(productId);
             return true;
         }
         return false;
@@ -136,6 +166,7 @@ public class UserService {
 
     @Async //use kafka or rabitMq
     @Transactional
+    @SneakyThrows
     public void SendOrderReciept(Long historyId) throws IOException {
       PastOrders order = pastOrderRepo.findById(historyId)
             .orElseThrow();

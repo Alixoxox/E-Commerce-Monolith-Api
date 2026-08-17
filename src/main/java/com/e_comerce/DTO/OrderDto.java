@@ -21,6 +21,12 @@ public class OrderDto {
         private Integer rating;
         private String Comment;
     }
+    @Data
+    @NoArgsConstructor
+     public static class EditRateProd{
+        private Integer rating;
+        private String Comment;
+    }
 
     @Data
     @AllArgsConstructor

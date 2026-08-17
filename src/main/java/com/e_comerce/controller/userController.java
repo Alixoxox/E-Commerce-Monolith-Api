@@ -51,16 +51,6 @@ public class userController {
         }
     }
 
-    @GetMapping("all")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public Object GetAllUsers(){
-        try{
-            return ResponseEntity.ok(US.GetUserCount());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @PostMapping("mark/wishlist/{productId}")
     public Object MarkWishlist(@PathVariable Long productId){
         try {
@@ -83,15 +73,31 @@ public class userController {
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
-
+    // TODO: stars and comment only one at a time possible
     @PostMapping("rate")
     public Object RateProduct(
             @RequestPart("rating") OrderDto.RateProd rp,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
+            System.out.println(rp);
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
             return ResponseEntity.status(HttpStatus.CREATED).body(US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),URL));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PutMapping("complete/rating/{ratingId}")
+    public Object CompleteProductRate(
+            @RequestPart("rating") OrderDto.EditRateProd rp,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @PathVariable Long ratingId ){
+        try{
+            String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
+            if (rp.getRating() == null || rp.getComment() == null || rp.getComment().isBlank() || URL == null || URL.isBlank()) {
+             throw new RuntimeException("There Should be atLeast One Change");
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),URL));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

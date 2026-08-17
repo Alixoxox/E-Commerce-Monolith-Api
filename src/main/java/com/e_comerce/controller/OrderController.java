@@ -9,10 +9,8 @@ import com.e_comerce.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +22,8 @@ public class OrderController {
     OrderService OS;
     @Autowired
     UserService us;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @GetMapping("history")
     public Object GetOrdersHistory(){
@@ -35,19 +35,7 @@ public class OrderController {
     return ResponseEntity.badRequest().body(e);
     }
     }
-    @GetMapping("all")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public Object GetOrdersHistory(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size){
-    try {
-        Page<UserDto.AllOrderHist> History= OS.GetAllOrders(page, size);
-        return ResponseEntity.ok(History);
-    } catch (Exception e) {
-        e.printStackTrace();
-    return ResponseEntity.badRequest().body(e);
-    }
-    }
+
     @GetMapping("history/bought/{HistoryNo}")
     public Object GetIndividualHistory(@PathVariable Long HistoryNo){
     try {
@@ -55,22 +43,8 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(History);
     } catch (Exception e) {
     return ResponseEntity.badRequest().body("History Of Products Bought could not Be Found");
-    }
-    }
-
-    @PutMapping("status/{orderId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public Object UpdateOrderStatus(@PathVariable Long orderId, @RequestBody OrderDto.UpdateStatus body){
-        try {
-            PastOrders order = OS.UpdateStatus(orderId, body.getStatus());
-            return ResponseEntity.ok(order);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @PostMapping("purchase")
     public Object BuyItems(@RequestBody OrderDto.Checkout prodsBuy){
@@ -79,6 +53,7 @@ public class OrderController {
             User user = entityManager.getReference(User.class,userId);
             PastOrders history= OS.createOrder(prodsBuy,user);
             // fire and forget mail to customer
+            // TODO : ADD KAFKA / RabbitMQ for Reliability
             us.SendOrderReciept(history.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
             } catch (Exception e) {

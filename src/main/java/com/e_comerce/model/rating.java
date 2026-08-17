@@ -11,6 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "product_id"})) // 1 user rating per product
 public class rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

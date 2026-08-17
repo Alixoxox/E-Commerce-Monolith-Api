@@ -75,5 +75,4 @@ public class productController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    //everyone's ratings comutative and comment section wrt product
 }

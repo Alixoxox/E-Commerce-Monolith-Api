@@ -17,18 +17,8 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        // Spring to use Redis instead of In-memory
         RedisCacheConfiguration config= RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(10)).serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(GenericJacksonJsonRedisSerializer.builder().build())); // default ttl is 10 mins and currently stored as Json
-
         return RedisCacheManager.builder(connectionFactory).cacheDefaults(config).build();
     }
-
-    @Bean
-    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
-        RedisTemplate<String,Object> redisTemplate =new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(GenericJacksonJsonRedisSerializer.builder().build());
-        return redisTemplate;
-    }
-//    template.opsForValue().set("age", 21,Duration.ofMinutes(1));
 }
