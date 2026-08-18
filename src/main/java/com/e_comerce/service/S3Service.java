@@ -1,8 +1,15 @@
 package com.e_comerce.service;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,22 +45,61 @@ public class S3Service {
 //        type -> "products/" :"user-review/";
         String key = type + UUID.randomUUID() + "-" + file.getOriginalFilename();
 
+        byte[] bytes = file.getBytes();
+        String contentType = file.getContentType();
+        if (contentType != null && contentType.startsWith("image/")) {
+            ResizedImage resized = resizeImage(bytes, contentType);
+            if (resized != null) {
+                bytes = resized.bytes;
+                contentType = resized.contentType;
+            }
+        }
+
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
-                .contentType(file.getContentType())
+                .contentType(contentType)
                 .build();
 
         s3Client.putObject(
                 request,
-                RequestBody.fromBytes(file.getBytes())
+                RequestBody.fromBytes(bytes)
         );
-
-        return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + key;
+        return key;
     }
 
-    public void deleteImageByUrl(String imageUrl) {
-        deleteImage(extractKey(imageUrl));
+    private record ResizedImage(byte[] bytes, String contentType) {}
+
+    private ResizedImage resizeImage(byte[] original, String contentType) throws IOException {
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(original));
+        if (img == null) {
+            return null;
+        }
+        int maxDim = 1000;
+        int w = img.getWidth();
+        int h = img.getHeight();
+        if (w <= maxDim && h <= maxDim) {
+            return null;
+        }
+        double scale = Math.min((double) maxDim / w, (double) maxDim / h);
+        int newW = Math.max(1, (int) Math.round(w * scale));
+        int newH = Math.max(1, (int) Math.round(h * scale));
+
+        BufferedImage resized = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resized.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.drawImage(img, 0, 0, newW, newH, null);
+        g.dispose();
+
+        String format = contentType.contains("png") ? "png" : "jpg";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(resized, format, baos);
+        return new ResizedImage(baos.toByteArray(), "image/" + format);
+    }
+
+    public void deleteImageByUrl(String key) {
+        deleteImage(key);
     }
 
     public void deleteImage(String key) {
@@ -63,10 +109,6 @@ public class S3Service {
                 .build();
 
         s3Client.deleteObject(deleteRequest);
-    }
-
-    public String getPresignedUrlByUrl(String imageUrl) {
-        return getPresignedUrl(extractKey(imageUrl));
     }
 
     public String getPresignedUrl(String key) {
@@ -83,9 +125,5 @@ public class S3Service {
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
 
         return presignedRequest.url().toString();
-    }
-
-    private String extractKey(String imageUrl) {
-        return imageUrl.substring(imageUrl.indexOf(".com/") + 5);
     }
 }

@@ -105,10 +105,6 @@ public class UserService {
         return rp.save(rate);
     }
     @SneakyThrows
-    @Caching(evict = {
-            @CacheEvict(value = "prodRating", key = "#productId"),
-            @CacheEvict(value = "prodFeedback", key = "#productId")
-    })
     public rating EditRateProduct(Long ratingId, Integer stars, String Comment, String Url){
         rating rate=entityManager.getReference(rating.class,ratingId);
         if(stars!=null){
@@ -140,7 +136,7 @@ public class UserService {
                         r.getComment(),
                         r.getCreatedAt(),
                         r.getFeedbackImage() !=null ?
-                        s3Service.getPresignedUrlByUrl(r.getFeedbackImage())
+                        s3Service.getPresignedUrl(r.getFeedbackImage())
                         : null,
                         r.getUser().getName(),
                         r.getUser().getId()))

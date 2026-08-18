@@ -2,10 +2,12 @@ package com.e_comerce.controller;
 
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
+import com.e_comerce.DTO.productDTOs;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.service.AdminSevice;
 import com.e_comerce.service.OrderService;
+import com.e_comerce.service.ProdService;
 import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,8 @@ public class adminController {
     private AdminSevice as;
     @Autowired
     private OrderService OS;
+    @Autowired
+    private ProdService PS;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("all")
@@ -47,11 +51,12 @@ public class adminController {
         }
     }
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("bulk")
+    @PostMapping("products/bulk")
     public Object BulkUploadProds(@RequestParam("file") MultipartFile file) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(as.bulkInsertFromCsv(file));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(e.getMessage());
         }
     }
@@ -68,7 +73,6 @@ public class adminController {
     return ResponseEntity.badRequest().body(e);
     }
     }
-
     @PutMapping("orders/status/{orderId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public Object UpdateOrderStatus(@PathVariable Long orderId, @RequestBody OrderDto.UpdateStatus body){
@@ -79,13 +83,49 @@ public class adminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping("/users/count")
     @PreAuthorize("hasAuthority('ADMIN')")
     public Object GetUserCount(){
         try{
             return ResponseEntity.ok(US.GetUserCount());
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("product/create")
+    public Object CreateProduct(@RequestPart("product") productDTOs.ProductDto dto,
+            @RequestPart(value = "image", required = false) MultipartFile image){
+        try{
+            if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
+            return ResponseEntity.status(HttpStatus.CREATED).body(PS.createProduct(dto,image));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("product/edit/{productId}")
+    public Object UpdateProduct(@RequestPart("product") productDTOs.ProductDto dto,
+            @RequestPart(value = "image", required = false) MultipartFile image){
+        try{
+            if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
+            return ResponseEntity.ok(PS.updateProduct(dto,image));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("product/del/{productId}")
+    public Object DeleteProduct(@PathVariable Long productId){
+        try{
+            PS.deleteProduct(productId);
+            return ResponseEntity.ok().build();
+        }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

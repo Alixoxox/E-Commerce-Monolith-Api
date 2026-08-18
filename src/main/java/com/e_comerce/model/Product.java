@@ -3,6 +3,7 @@ package com.e_comerce.model;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.e_comerce.model.enums.Category;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,8 +24,8 @@ public class Product {
     private String title;
 
     private String description;
-
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
     private String image;
     private Integer stock;

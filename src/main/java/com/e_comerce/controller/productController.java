@@ -1,10 +1,13 @@
 package com.e_comerce.controller;
-import java.util.List;
-import java.util.Optional;
-import com.e_comerce.model.Product;
+
+import java.util.Arrays;
+
+import com.e_comerce.DTO.productDTOs;
+import com.e_comerce.model.enums.Category;
 import com.e_comerce.service.ProdService;
 import com.e_comerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +24,15 @@ public class productController {
     @GetMapping("all")
     public Object GetAllProducts(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "") String search,
+        @RequestParam(defaultValue = "") Category category,
+        @RequestParam(defaultValue = "") String sort) {
         try {
-            return ResponseEntity.ok(PS.getProducts(page,size));
+           Page<productDTOs.ProductSummary> x= PS.getProducts(page,size, search, category, sort);
+            return ResponseEntity.ok(x);
         }catch(Exception err){
+            err.printStackTrace();
             return ResponseEntity.badRequest().body(err.getMessage());
         }   
     }
@@ -32,28 +40,17 @@ public class productController {
     @GetMapping("{productId}")
     public Object GetOneProduct(@PathVariable Long productId){
         try{
-            Optional<Product> prod= PS.getOneProd(productId);
-            return ResponseEntity.accepted().body(prod);
+            return ResponseEntity.accepted().body(PS.getOneProd(productId));
         }catch (Exception err){
             return ResponseEntity.badRequest().body(err.getMessage());
         }
     }
 
-    @GetMapping("categories")
-    public Object GetCategories(){
-        try{
-            List<String> x= PS.getCategories();
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(x);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
     //related prods
     @GetMapping("category/{category}")
-    public Object GetCategoryProduct(@PathVariable String category){
+    public Object GetCategoryProduct(@PathVariable Category category){
         try{
-            List<Product> prod= PS.ProdsByCategory(category);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(prod);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(PS.ProdsByCategory(category));
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

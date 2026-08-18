@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class WishService {
 
     @SneakyThrows
     @Transactional
+    @CacheEvict(value="Wishlist",key="#userId")
     public void MarkWish(Long userId,Long productId){
         if (wishRepo.existsByUser_IdAndProduct_Id(userId, productId)) {
             wishRepo.deleteByUser_IdAndProduct_Id(userId, productId);

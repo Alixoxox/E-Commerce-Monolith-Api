@@ -11,7 +11,6 @@ import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
 import com.e_comerce.model.enums.OrderStatus;
-import com.e_comerce.repository.OrderItemRepo;
 import com.e_comerce.repository.PastOrderRepo;
 import com.e_comerce.repository.ProductPriceView;
 import com.e_comerce.repository.ProductRepo;
@@ -34,10 +33,10 @@ public class OrderService {
     private ProductRepo Pr;
     @Autowired
     private PastOrderRepo OPR;
-    @Autowired
-    private OrderItemRepo OIR;
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private ProdService PS;
 
     private static final BigDecimal TAX_RATE = new BigDecimal("0.05"); // 5%
 
@@ -45,7 +44,7 @@ public class OrderService {
 @Transactional
 @Caching(evict = {
     @CacheEvict(value = "UserOrderHistory", key = "#user.id"),
-    @CacheEvict(value = "AdminOrderListAll", allEntries = true)
+    @CacheEvict("AdminGetAllOrders")
 })
 public PastOrders createOrder(OrderDto.Checkout prods, User user) {
 
@@ -99,14 +98,14 @@ public PastOrders createOrder(OrderDto.Checkout prods, User user) {
     public List<UserDto.UserOrderHist> GetHistory(Long userId){
     return OPR.findOrderByUserId(userId);
     }
-    @Cacheable(value = "AdminOrderListAll",key="#page + ':' + #size")
+    @Cacheable("AdminGetAllOrders")
     public Page<UserDto.AllOrderHist> GetAllOrders(int page, int size){
     PageRequest pageable = PageRequest.of(page, size);
     return OPR.findAllOrders(pageable);
     }
     @Cacheable(value="OrderHistoryProductsDetail",key = "#HistoryId")
     public List<UserDto.UserOrderItemHist> OrderHistoryProducts(Long HistoryId){
-    return OPR.findOrderItemRaw(HistoryId);
+    return  convertToViewAbleImage(OPR.findOrderItemRaw(HistoryId));
     }
 
     @Transactional
@@ -117,6 +116,15 @@ public PastOrders createOrder(OrderDto.Checkout prods, User user) {
         }
         order.setStatus(status);
         return entityManager.merge(order);
+    }
+    private List<UserDto.UserOrderItemHist> convertToViewAbleImage(List<UserDto.UserOrderItemHist> history) {
+    return history.stream().map(product -> convertToViewAbleImage(product)).toList();
+    }
+    private UserDto.UserOrderItemHist convertToViewAbleImage(UserDto.UserOrderItemHist p) {
+        if(p==null){
+            return null;
+        }
+        return new UserDto.UserOrderItemHist(p.getId(),p.getTitle(),PS.convertImg(p.getImage()),p.getCategory(),p.getQuantity(),p.getPriceAtPurchase());
     }
 
 }

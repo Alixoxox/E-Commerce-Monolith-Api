@@ -3,6 +3,7 @@ package com.e_comerce.DTO;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.e_comerce.model.enums.Category;
 import com.e_comerce.model.enums.OrderStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,7 +38,7 @@ public class UserDto {
         private Long id;
         private String title;
         private String image;
-        private String category;
+        private Category category;
         private Integer quantity;
         private BigDecimal priceAtPurchase;
     }

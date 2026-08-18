@@ -6,17 +6,20 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.e_comerce.model.Product;
-import com.e_comerce.repository.PastOrderRepo;
+import com.e_comerce.model.enums.Category;
 import com.e_comerce.repository.ProductRepo;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,13 +28,13 @@ public class AdminSevice {
 
     @Autowired
     private ProductRepo productRepository;
-    @Autowired
-    private PastOrderRepo pastOrderRepo;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @SneakyThrows
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "Categories",allEntries = true),
+            @CacheEvict(value = "ProdsByCategory",allEntries = true)
+    })
     public String bulkInsertFromCsv(MultipartFile file) {
 
         if (file.isEmpty()) {
@@ -62,7 +65,7 @@ public class AdminSevice {
                 String image = row[2].trim();
                 BigDecimal price;
                 Integer stock;
-                String category = row[5].trim();
+                Category category = Category.valueOf(row[5].trim().toUpperCase());
 
                 if (title.isBlank()) {
                     throw new IllegalArgumentException("Row " + lineNumber + ": title is required");
@@ -86,10 +89,6 @@ public class AdminSevice {
                     throw new IllegalArgumentException("Row " + lineNumber + ": stock cannot be negative");
                 }
 
-                if (category.isBlank()) {
-                    throw new IllegalArgumentException("Row " + lineNumber + ": category is required");
-                }
-
                 Product product = new Product();
                 product.setTitle(title);
                 product.setDescription(description);
@@ -106,7 +105,12 @@ public class AdminSevice {
             throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
         }
 
+        Set<String> titles = products.stream().map(P -> P.getTitle()).collect(Collectors.toSet());
+        Set<String> existingTitles = productRepository.findExistingTitles(titles);
+
+        products.removeIf(p -> existingTitles.contains(p.getTitle()));
+
         productRepository.saveAll(products);
-        return "Products Successfully uploaded to the Database";
+        return "Products Successfully uploaded to the Database.\nAny Repeating Products were removed and did not save to db.";
     }
 }
