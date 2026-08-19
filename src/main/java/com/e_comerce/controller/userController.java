@@ -13,7 +13,6 @@ import com.e_comerce.service.WishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,7 +60,7 @@ public class userController {
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
-    // TODO : Implement streaming service when price go down then alert people for message
+    // TODO : Implement streaming service when price go down then alert people for message -> OPTIONAL
 
     @GetMapping("watch/wishlist")
     public Object FetchWishlist(){
@@ -73,7 +72,6 @@ public class userController {
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
-    // TODO: stars and comment only one at a time possible
     @PostMapping("rate")
     public Object RateProduct(
             @RequestPart("rating") OrderDto.RateProd rp,
@@ -130,5 +128,4 @@ public class userController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    // user receives email after bought
 }
