@@ -68,6 +68,7 @@ public class UserService {
             userM.setName(UDR.getName());
             userM.setEmail(UDR.getEmail());
             userM.setPassword(passwordEncoder.encode(UDR.getPassword()));
+            userM.setUserRole(role);
             userM.setCreated_at(LocalDateTime.now());
             User user = UR.save(userM);
             UserDto.UserSummaryDto summary = new UserDto.UserSummaryDto(user.getId(), user.getName(), user.getEmail());
