@@ -1,6 +1,7 @@
 package com.e_comerce.service;
 
 import static com.e_comerce.config.RedisAndRabbitConfig.EMAIL_QUEUE;
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_DEL_QUEUE;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -157,7 +158,7 @@ public class UserService {
             rating rating = x.get();
             Long productId= rating.getProduct().getId();
             if (rating.getFeedbackImage() != null) {
-                s3Service.deleteImageByUrl(rating.getFeedbackImage());
+                rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,rating.getFeedbackImage());
             }
             rp.deleteById(ratingId);
              cacheManager.getCache("prodRating").evict(productId);

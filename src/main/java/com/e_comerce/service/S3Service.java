@@ -1,5 +1,8 @@
 package com.e_comerce.service;
 
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_DEL_QUEUE;
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_QUEUE;
+
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -11,9 +14,14 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import com.e_comerce.DTO.UserDto;
+import com.e_comerce.repository.ProductRepo;
+import com.e_comerce.repository.RatingRepo;
+import jakarta.transaction.Transactional;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -25,9 +33,14 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 @Service
 public class S3Service {
-
-    private final S3Client s3Client;
-    private final S3Presigner s3Presigner;
+    @Autowired
+    private S3Client s3Client;
+    @Autowired
+    private S3Presigner s3Presigner;
+    @Autowired
+    private RatingRepo ratingRepo;
+    @Autowired
+    private ProductRepo productRepo;
 
     @Value("${aws.s3.bucket}")
     private String bucketName;
@@ -35,18 +48,15 @@ public class S3Service {
     @Value("${aws.region}")
     private String region;
 
-    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
-    }
-
-    public String uploadImage(MultipartFile file, String type) throws IOException {
+    @Transactional
+    @RabbitListener(queues = IMAGE_QUEUE)
+    public void uploadImage(UserDto.rateImg payload) throws IOException {
 
 //        type -> "products/" :"user-review/";
-        String key = type + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        String key = payload.getLocation() + UUID.randomUUID() + "-" + payload.getFile().getOriginalFilename();
 
-        byte[] bytes = file.getBytes();
-        String contentType = file.getContentType();
+        byte[] bytes = payload.getFile().getBytes();
+        String contentType = payload.getFile().getContentType();
         if (contentType != null && contentType.startsWith("image/")) {
             ResizedImage resized = resizeImage(bytes, contentType);
             if (resized != null) {
@@ -61,11 +71,15 @@ public class S3Service {
                 .contentType(contentType)
                 .build();
 
-        s3Client.putObject(
-                request,
-                RequestBody.fromBytes(bytes)
-        );
-        return key;
+        s3Client.putObject(request, RequestBody.fromBytes(bytes));
+
+        // its a rating / feedback img
+        if(payload.getRatingId()!=null ){
+            ratingRepo.updateFeedbackImage(payload.getRatingId(),key);
+        }else{
+            // must be for product
+            productRepo.updateImage(payload.getProdId(), key);
+        }
     }
 
     private record ResizedImage(byte[] bytes, String contentType) {}
@@ -97,13 +111,9 @@ public class S3Service {
         ImageIO.write(resized, format, baos);
         return new ResizedImage(baos.toByteArray(), "image/" + format);
     }
-
+    @RabbitListener(queues = IMAGE_DEL_QUEUE)
     public void deleteImageByUrl(String key) {
-        deleteImage(key);
-    }
-
-    public void deleteImage(String key) {
-        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .build();

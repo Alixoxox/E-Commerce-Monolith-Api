@@ -1,12 +1,14 @@
 package com.e_comerce.controller;
 
 import static com.e_comerce.config.RedisAndRabbitConfig.EMAIL_QUEUE;
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_QUEUE;
 
 import java.util.List;
 
 import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.enums.UserRole;
+import com.e_comerce.model.rating;
 import com.e_comerce.model.wishlist;
 import com.e_comerce.service.EmailService;
 import com.e_comerce.service.S3Service;
@@ -76,14 +78,19 @@ public class userController {
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
+
     @PostMapping("rate")
     public Object RateProduct(
             @RequestPart("rating") OrderDto.RateProd rp,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
-            return ResponseEntity.status(HttpStatus.CREATED).body(US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),URL));
+            rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
+            if(image != null && !image.isEmpty()){
+                UserDto.rateImg r= new UserDto.rateImg(rate.getId(), null, image,"user-review/");
+                rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body("Your Response Has been Recorded");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -94,11 +101,14 @@ public class userController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @PathVariable Long ratingId ){
         try{
-            String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
-            if (rp.getRating() == null || rp.getComment() == null || rp.getComment().isBlank() || URL == null || URL.isBlank()) {
+            if (rp.getRating() == null || rp.getComment() == null || rp.getComment().isBlank() || image == null || image.isEmpty()) {
              throw new RuntimeException("There Should be atLeast One Change");
             }
-            return ResponseEntity.status(HttpStatus.CREATED).body(US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),URL));
+            if(image != null && !image.isEmpty()){
+                UserDto.rateImg r= new UserDto.rateImg(ratingId, null, image,"user-review/");
+                rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

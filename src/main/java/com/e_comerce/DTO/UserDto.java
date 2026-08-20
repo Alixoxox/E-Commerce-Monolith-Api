@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UserDto {
     @Data
@@ -81,5 +82,13 @@ public class UserDto {
         private String subject;
         private String message;
         private  Boolean isHtml;
+    }
+    @Data
+    @AllArgsConstructor
+    public static class rateImg{
+        private Long ratingId;
+        private Long prodId;
+        private MultipartFile file;
+        private String location;
     }
 }

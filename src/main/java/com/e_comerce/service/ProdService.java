@@ -1,10 +1,15 @@
 package com.e_comerce.service;
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_QUEUE;
+
 import java.util.List;
+
+import com.e_comerce.DTO.UserDto;
 import com.e_comerce.DTO.productDTOs;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.enums.Category;
 import com.e_comerce.repository.ProductRepo;
 import lombok.SneakyThrows;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,9 +28,9 @@ public class ProdService {
     @Autowired
     private ProductRepo PR;
     @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
     private S3Service s3Service;
-    // cant put here not at getOneProduct due to JSON serialization can't reconstruct
-    // TODO : SEARCH Up How to ADD Caching here
     public Page<productDTOs.ProductSummary> getProducts(int page, int size, String search, Category category, String sort) {
         Sort s = Sort.by(Sort.Direction.ASC, "id");
         if (sort != null) {
@@ -45,34 +50,36 @@ public class ProdService {
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
-
     public Product createProduct(productDTOs.ProductDto dto, MultipartFile image) {
-        String key = null;
-        if(!image.isEmpty()){
-            key = s3Service.uploadImage(image,"products/");
-        }
+        Boolean key=false;
         Product product = new Product();
-        apply(product, dto,key);
-        return PR.save(product);
+        if(!image.isEmpty()){
+            UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
+            rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg); //todo
+            key=true;
+        }
+        Product newProd= apply(product, dto,key);
+        return PR.save(newProd);
     }
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
     public Product updateProduct(productDTOs.ProductDto dto, MultipartFile image) {
         Product product = PR.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Product Not Found"));
-        String key = null;
+        Boolean key = false;
         if(image != null && !image.isEmpty()){
-            key = s3Service.uploadImage(image,"products/");
+            UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
+            rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg);
+            key = true;
         }
-        apply(product, dto ,key);
-        return PR.save(product);
+        Product newProd= apply(product, dto ,key);
+        return PR.save(newProd);
     }
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
     public void deleteProduct(Long id) {
-        if (!PR.existsById(id)) {
-            throw new RuntimeException("Product Not Found");
-        }
+        Product prod= PR.findById(id).orElseThrow(()-> new RuntimeException("Product Not Found"));
+        rabbitTemplate.convertAndSend(prod.getImage());
         PR.deleteById(id);
     }
     @Cacheable(value="ProdsByCategory",key="#cat")
@@ -84,19 +91,21 @@ public class ProdService {
             throw new RuntimeException("No products found.");
         }
     }
-    private void apply(Product product, productDTOs.ProductDto dto, String key) {
+    private Product apply(Product product, productDTOs.ProductDto dto, Boolean Img) {
         product.setTitle(dto.getTitle());
         product.setDescription(dto.getDescription());
         product.setCategory(dto.getCategory());
-        if(key != null){
-            product.setImage(key);
+        if(Img==true){
+            product.setImage(null);
         } else {
+            //image link
             product.setImage(dto.getImage());
         }
         product.setStock(dto.getStock());
         product.setPrice(dto.getPrice());
+        return product;
     }
-    //TODO : CACHE
+
     public Product getOneProd(Long id){
         Product prod =PR.findById(id).orElseThrow(() -> new RuntimeException("Product Not Found"));
         return convertToViewAbleImage(prod);

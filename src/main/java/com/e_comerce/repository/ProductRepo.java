@@ -36,8 +36,13 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 
     @Modifying
     @Query("UPDATE Product p SET p.stock = p.stock - :qty WHERE p.id = :id AND p.stock >= :qty")
-    int decrementStock(@Param("id") Long id, @Param("qty") Integer qty);
+    int decrementStock(@Param("id") Long id, @Param("qty") Integer qty); // Atomic operation
 
     @Query("SELECT p.title FROM Product p WHERE p.title IN :titles")
     Set<String> findExistingTitles(@Param("titles") Set<String> titles);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.image = :key WHERE p.id = :ratingId")
+    void updateImage(@Param("productId") Long productId, @Param("key") String key);
+
 }
