@@ -76,9 +76,10 @@ public class UserDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class supportMsg{
-        private String mail;
+    public static class supportMsg {
+        private String userEmail;
         private String subject;
         private String message;
+        private  Boolean isHtml;
     }
 }

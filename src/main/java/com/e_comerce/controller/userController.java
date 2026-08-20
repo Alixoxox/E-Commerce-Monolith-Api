@@ -1,5 +1,7 @@
 package com.e_comerce.controller;
 
+import static com.e_comerce.config.RedisAndRabbitConfig.EMAIL_QUEUE;
+
 import java.util.List;
 
 import com.e_comerce.DTO.OrderDto;
@@ -10,6 +12,7 @@ import com.e_comerce.service.EmailService;
 import com.e_comerce.service.S3Service;
 import com.e_comerce.service.UserService;
 import com.e_comerce.service.WishService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,8 @@ public class userController {
     private WishService ws;
     @Autowired
     private S3Service ss;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @PostMapping("auth/register")
     public Object CreateUser(@RequestBody UserDto.Request UR){
@@ -41,7 +46,6 @@ public class userController {
     @PostMapping("auth/login")
     public Object loginUser(@RequestBody UserDto.Login UDLog){
         try{
-            System.out.print(UDLog);
             Object data = US.LoginUser(UDLog, UserRole.USER);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
         } catch (Exception e) {
@@ -77,7 +81,6 @@ public class userController {
             @RequestPart("rating") OrderDto.RateProd rp,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
-            System.out.println(rp);
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String URL = (image != null && !image.isEmpty()) ? ss.uploadImage(image,"user-review/") : null;
             return ResponseEntity.status(HttpStatus.CREATED).body(US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),URL));
@@ -116,12 +119,12 @@ public class userController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @Autowired
-    private EmailService emailService;
+
     @PostMapping("sendMail")
     public Object SendMail(@RequestBody UserDto.supportMsg sm){
         try{
-            emailService.sendSupportMessage(sm.getMail(),sm.getSubject(),sm.getMessage());
+            sm.setIsHtml(false);
+            rabbitTemplate.convertAndSend(EMAIL_QUEUE,sm);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body("We have received your message and will hear from us soon.");
         } catch (Exception e) {
             e.printStackTrace();

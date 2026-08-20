@@ -53,7 +53,6 @@ public class OrderController {
             User user = entityManager.getReference(User.class,userId);
             PastOrders history= OS.createOrder(prodsBuy,user);
             // fire and forget mail to customer
-            // TODO : ADD KAFKA / RabbitMQ for Reliability
             us.SendOrderReciept(history.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
             } catch (Exception e) {

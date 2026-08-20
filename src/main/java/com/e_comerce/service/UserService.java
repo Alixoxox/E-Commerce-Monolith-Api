@@ -1,5 +1,7 @@
 package com.e_comerce.service;
 
+import static com.e_comerce.config.RedisAndRabbitConfig.EMAIL_QUEUE;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +22,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -51,6 +55,8 @@ public class UserService {
     private PastOrderRepo pastOrderRepo;
     @Autowired
     private CacheManager cacheManager;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Cacheable("adminUsers")
     public List<User> FetchUserData() {
@@ -161,13 +167,12 @@ public class UserService {
         return false;
     }
 
-    @Async //use kafka or rabitMq
     @Transactional
     @SneakyThrows
     public void SendOrderReciept(Long historyId) throws IOException {
-      PastOrders order = pastOrderRepo.findById(historyId)
-            .orElseThrow();
+      PastOrders order = pastOrderRepo.findById(historyId).orElseThrow();
       String html = buildRecieptHtml.build(order);
-      emailService.sendHtmlEmail(order.getUser().getEmail(), "Receipt - MEZN-" + order.getId(), html);
+      UserDto.supportMsg message=new UserDto.supportMsg(order.getUser().getEmail(), "Receipt - MEZN-" + order.getId(), html,true);
+      rabbitTemplate.convertAndSend(EMAIL_QUEUE,message);
     }
 }
