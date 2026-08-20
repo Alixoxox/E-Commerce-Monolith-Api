@@ -113,7 +113,7 @@ public class UserService {
         return rp.save(rate);
     }
     @SneakyThrows
-    public rating EditRateProduct(Long ratingId, Integer stars, String Comment, String Url){
+    public void EditRateProduct(Long ratingId, Integer stars, String Comment, String Url){
         rating rate=entityManager.getReference(rating.class,ratingId);
         if(stars!=null){
             rate.setValue(stars);
@@ -125,7 +125,7 @@ public class UserService {
         Long productId=rate.getProduct().getId();
         cacheManager.getCache("prodRating").evict(productId);
         cacheManager.getCache("prodFeedback").evict(productId);
-        return rp.save(rate);
+        rp.save(rate);
     }
 
     @SneakyThrows

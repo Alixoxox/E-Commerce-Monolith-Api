@@ -1,4 +1,5 @@
 package com.e_comerce.service;
+import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_DEL_QUEUE;
 import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_QUEUE;
 
 import java.util.List;
@@ -13,7 +14,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +50,7 @@ public class ProdService {
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
-    public Product createProduct(productDTOs.ProductDto dto, MultipartFile image) {
+    public void createProduct(productDTOs.ProductDto dto, MultipartFile image) {
         Boolean key=false;
         Product product = new Product();
         if(!image.isEmpty()){
@@ -59,12 +59,12 @@ public class ProdService {
             key=true;
         }
         Product newProd= apply(product, dto,key);
-        return PR.save(newProd);
+        PR.save(newProd);
     }
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
-    public Product updateProduct(productDTOs.ProductDto dto, MultipartFile image) {
+    public void updateProduct(productDTOs.ProductDto dto, MultipartFile image) {
         Product product = PR.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Product Not Found"));
         Boolean key = false;
         if(image != null && !image.isEmpty()){
@@ -73,13 +73,13 @@ public class ProdService {
             key = true;
         }
         Product newProd= apply(product, dto ,key);
-        return PR.save(newProd);
+        PR.save(newProd);
     }
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
     public void deleteProduct(Long id) {
         Product prod= PR.findById(id).orElseThrow(()-> new RuntimeException("Product Not Found"));
-        rabbitTemplate.convertAndSend(prod.getImage());
+        rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,prod.getImage());
         PR.deleteById(id);
     }
     @Cacheable(value="ProdsByCategory",key="#cat")

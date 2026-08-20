@@ -70,7 +70,7 @@ public class adminController {
         return ResponseEntity.ok(History);
     } catch (Exception e) {
         e.printStackTrace();
-    return ResponseEntity.badRequest().body(e);
+        return ResponseEntity.badRequest().body(e);
     }
     }
     @PutMapping("orders/status/{orderId}")
@@ -99,7 +99,8 @@ public class adminController {
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
             if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
-            return ResponseEntity.status(HttpStatus.CREATED).body(PS.createProduct(dto,image));
+            PS.createProduct(dto,image);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Product "+dto.getTitle()+" Created");
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -112,7 +113,8 @@ public class adminController {
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
             if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
-            return ResponseEntity.ok(PS.updateProduct(dto,image));
+            PS.updateProduct(dto,image);
+            return ResponseEntity.ok("Product "+dto.getTitle()+"Edited");
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());

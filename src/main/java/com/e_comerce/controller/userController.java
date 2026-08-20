@@ -108,7 +108,8 @@ public class userController {
                 UserDto.rateImg r= new UserDto.rateImg(ratingId, null, image,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
             }
-            return ResponseEntity.status(HttpStatus.CREATED).body(US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null));
+            US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null);
+            return ResponseEntity.status(HttpStatus.CREATED).body("The Product has now been altered");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
