@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<meta name="format-detection" content="telephone=no">
+<title>Order Status Update</title>
+<style>
+  body, table, td { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table { border-collapse:collapse; }
+  img { border:0; line-height:100%; outline:none; text-decoration:none; }
+
+  @media only screen and (max-width:640px) {
+    .container { width:100% !important; max-width:100% !important; }
+    .stack { display:block !important; width:100% !important; text-align:left !important; padding:0 !important; }
+    .stack-right { text-align:left !important; margin-left:0 !important; }
+    .divider-r { border-right:none !important; border-bottom:1px solid #eaecf0 !important; padding-bottom:18px !important; margin-bottom:18px !important; }
+    .pad { padding-left:22px !important; padding-right:22px !important; }
+    .totals-cell { width:100% !important; }
+    .totals-spacer { display:none !important; }
+    .desc-col { font-size:12.5px !important; }
+    .hide-mobile { display:none !important; }
+    .status-badge-lg { font-size:20px !important; padding:10px 20px !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#eef0f2; font-family: Georgia, 'Times New Roman', serif;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef0f2; padding:44px 12px; border-collapse:collapse;">
+  <tr>
+    <td align="center">
+      <table role="presentation" class="container" width="640" cellpadding="0" cellspacing="0" border="0" style="width:640px; max-width:640px; background-color:#ffffff; border:1px solid #d0d5dd; border-collapse:collapse;">
+
+        <!-- Letterhead -->
+        <tr>
+          <td class="pad" style="padding:34px 44px 26px 44px; border-bottom:2px solid #101828;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td class="stack" style="vertical-align:top;">
+                  <p style="margin:0; font-size:19px; font-weight:bold; color:#101828; letter-spacing:0.4px;" th:text="${companyName} ?: 'Your Store'">Your Store</p>
+                  <p style="margin:5px 0 0 0; font-size:11px; color:#667085; font-family: Helvetica, Arial, sans-serif; letter-spacing:1px; text-transform:uppercase;">Order Status Update</p>
+                </td>
+                <td class="stack stack-right" style="vertical-align:top; text-align:right; font-family: Helvetica, Arial, sans-serif; padding-top:12px;">
+                  <p style="margin:0; font-size:10.5px; color:#667085; letter-spacing:0.5px; text-transform:uppercase;">Order No.</p>
+                  <p style="margin:3px 0 0 0; font-size:14px; font-weight:bold; color:#101828;" th:text="'MEZN-' + ${order.id}">MEZN-12345</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Status hero -->
+        <tr>
+          <td class="pad" style="padding:34px 44px 0 44px; font-family: Helvetica, Arial, sans-serif; text-align:center;">
+            <p style="margin:0 0 14px 0; font-size:13px; color:#667085;" th:text="'Dear ' + ${order.user.name} + ', the status of your order has been updated to:'">Dear Customer, the status of your order has been updated to:</p>
+            <span class="status-badge-lg" style="display:inline-block; border:1.5px solid #101828; color:#101828; padding:9px 24px; font-size:16px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;" th:text="${order.status}">SHIPPED</span>
+
+            <div th:switch="${order.status}" style="margin:18px 0 0 0;">
+              <p th:case="'SHIPPED'" style="margin:0; font-size:13px; color:#344054; line-height:1.7;">Your order has been dispatched and is currently in transit to the address on file. Please allow the standard delivery window for arrival.</p>
+              <p th:case="'DELIVERED'" style="margin:0; font-size:13px; color:#344054; line-height:1.7;">Your order has been successfully delivered. We trust that all items were received in satisfactory condition, and thank you for your continued business.</p>
+              <p th:case="'CANCELLED'" style="margin:0; font-size:13px; color:#344054; line-height:1.7;">This order has been cancelled. Should this action not have been initiated by you, please contact us immediately by replying to this email.</p>
+              <p th:case="*" style="margin:0; font-size:13px; color:#344054; line-height:1.7;">Please find the current status of your order detailed below.</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Meta row: ship to -->
+        <tr>
+          <td class="pad" style="padding:30px 44px 0 44px; font-family: Helvetica, Arial, sans-serif;">
+            <p style="margin:0 0 8px 0; font-size:10.5px; color:#667085; text-transform:uppercase; letter-spacing:0.6px; font-weight:bold;">Shipping To</p>
+            <p style="margin:0; font-size:13px; color:#344054; line-height:1.7;">
+              <span style="font-weight:bold; color:#101828;" th:text="${order.user.name}">Customer Name</span><br>
+              <span th:text="${order.address}">Street Address</span><br>
+              <span th:text="${order.city}">City</span>,
+              <span th:text="${order.country}">Country</span>
+              <span th:text="${order.postalCode}">00000</span><br>
+              <span th:text="${order.phoneNumber}">+92 000 0000000</span>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Items table -->
+        <tr>
+          <td class="pad" style="padding:32px 44px 0 44px; font-family: Helvetica, Arial, sans-serif;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <thead>
+                <tr>
+                  <td style="padding:0 6px 10px 0; border-bottom:1.5px solid #101828; font-size:10.5px; color:#101828; text-transform:uppercase; letter-spacing:0.5px; font-weight:bold;">Description</td>
+                  <td style="padding:0 6px 10px 6px; border-bottom:1.5px solid #101828; font-size:10.5px; color:#101828; text-transform:uppercase; letter-spacing:0.5px; font-weight:bold; text-align:center;">Qty</td>
+                  <td class="hide-mobile" style="padding:0 6px 10px 6px; border-bottom:1.5px solid #101828; font-size:10.5px; color:#101828; text-transform:uppercase; letter-spacing:0.5px; font-weight:bold; text-align:right;">Unit Price</td>
+                  <td style="padding:0 0 10px 6px; border-bottom:1.5px solid #101828; font-size:10.5px; color:#101828; text-transform:uppercase; letter-spacing:0.5px; font-weight:bold; text-align:right;">Amount</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="item, iStat : ${order.orderItems}">
+                  <td class="desc-col" style="padding:12px 6px 12px 0; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054;" th:style="${iStat.last} ? 'padding:12px 6px 12px 0; font-size:13px; color:#344054;' : 'padding:12px 6px 12px 0; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054;'" th:text="${item.product.title}">Product Name</td>
+                  <td style="padding:12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054; text-align:center;" th:style="${iStat.last} ? 'padding:12px 6px; font-size:13px; color:#344054; text-align:center;' : 'padding:12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054; text-align:center;'" th:text="${item.quantity}">1</td>
+                  <td class="hide-mobile" style="padding:12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054; text-align:right;" th:style="${iStat.last} ? 'padding:12px 6px; font-size:13px; color:#344054; text-align:right;' : 'padding:12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#344054; text-align:right;'" th:text="|$${#numbers.formatDecimal(item.priceAtPurchase, 1, 'COMMA', 2, 'POINT')}|">$0.00</td>
+                  <td style="padding:12px 0 12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#101828; text-align:right; font-weight:bold;" th:style="${iStat.last} ? 'padding:12px 0 12px 6px; font-size:13px; color:#101828; text-align:right; font-weight:bold;' : 'padding:12px 0 12px 6px; border-bottom:1px solid #eaecf0; font-size:13px; color:#101828; text-align:right; font-weight:bold;'" th:text="|$${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}|">$0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td class="pad" style="padding:36px 44px 32px 44px; font-family: Helvetica, Arial, sans-serif;">
+            <div style="padding-top:20px;">
+              <p style="margin:0; font-size:12px; color:#667085; line-height:1.7; text-align:center;">
+                Thank you for your business.<br>
+                For questions about this order, reply directly to this email.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

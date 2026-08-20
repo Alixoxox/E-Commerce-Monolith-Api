@@ -53,7 +53,7 @@ public class OrderController {
             User user = entityManager.getReference(User.class,userId);
             PastOrders history= OS.createOrder(prodsBuy,user);
             // fire and forget mail to customer
-            us.SendOrderReciept(history.getId());
+            us.SendOrderReciept(history.getId(),false);
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
             } catch (Exception e) {
            return ResponseEntity.badRequest().body(e.getMessage());

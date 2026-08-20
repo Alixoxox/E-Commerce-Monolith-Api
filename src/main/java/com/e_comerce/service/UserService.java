@@ -14,6 +14,8 @@ import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
+import com.e_comerce.model.enums.Category;
+import com.e_comerce.model.enums.OrderStatus;
 import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.model.rating;
 import com.e_comerce.repository.PastOrderRepo;
@@ -170,10 +172,11 @@ public class UserService {
 
     @Transactional
     @SneakyThrows
-    public void SendOrderReciept(Long historyId) throws IOException {
+    public void SendOrderReciept(Long historyId, Boolean statusChange) throws IOException {
       PastOrders order = pastOrderRepo.findById(historyId).orElseThrow();
-      String html = buildRecieptHtml.build(order);
+      String html = buildRecieptHtml.build(order,statusChange);
       UserDto.supportMsg message=new UserDto.supportMsg(order.getUser().getEmail(), "Receipt - MEZN-" + order.getId(), html,true);
       rabbitTemplate.convertAndSend(EMAIL_QUEUE,message);
     }
+
 }

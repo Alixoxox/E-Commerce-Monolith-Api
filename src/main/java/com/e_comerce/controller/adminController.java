@@ -78,6 +78,7 @@ public class adminController {
     public Object UpdateOrderStatus(@PathVariable Long orderId, @RequestBody OrderDto.UpdateStatus body){
         try {
             PastOrders order = OS.UpdateStatus(orderId, body.getStatus());
+            US.SendOrderReciept(orderId,true);
             return ResponseEntity.ok(order);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

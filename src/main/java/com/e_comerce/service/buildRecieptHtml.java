@@ -14,13 +14,16 @@ public class buildRecieptHtml {
         this.templateEngine = templateEngine;
     }
 
-    public String build(PastOrders order) {
+    public String build(PastOrders order,Boolean status) {
 
         Context context = new Context();
 
         context.setVariable("companyName", "Meezan Store");
+
         context.setVariable("order", order);
 
-        return templateEngine.process("order", context);
+        String templateName = (status != null && status) ? "status" : "order";
+
+        return templateEngine.process(templateName, context);
     }
 }
