@@ -86,8 +86,9 @@ public class userController {
         try{
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
-            if(image != null && !image.isEmpty()){
-                UserDto.rateImg r= new UserDto.rateImg(rate.getId(), null, image,"user-review/");
+            if(image!=null && !image.isEmpty()){
+                UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
+                UserDto.rateImg r= new UserDto.rateImg(rate.getId(), null, newImg,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body("Your Response Has been Recorded");
@@ -105,7 +106,8 @@ public class userController {
              throw new RuntimeException("There Should be atLeast One Change");
             }
             if(image != null && !image.isEmpty()){
-                UserDto.rateImg r= new UserDto.rateImg(ratingId, null, image,"user-review/");
+                UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
+                UserDto.rateImg r= new UserDto.rateImg(ratingId, null, newImg,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
             }
             US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null);

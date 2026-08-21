@@ -53,9 +53,9 @@ public class S3Service {
     public void uploadImage(UserDto.rateImg payload) throws IOException {
 
 //        type -> "products/" :"user-review/";
-        String key = payload.getLocation() + UUID.randomUUID() + "-" + payload.getFile().getOriginalFilename();
+        String key = payload.getLocation() + UUID.randomUUID() + "-" + payload.getFile().getFilename();
 
-        byte[] bytes = payload.getFile().getBytes();
+        byte[] bytes = payload.getFile().getContent();
         String contentType = payload.getFile().getContentType();
         if (contentType != null && contentType.startsWith("image/")) {
             ResizedImage resized = resizeImage(bytes, contentType);

@@ -88,7 +88,14 @@ public class UserDto {
     public static class rateImg{
         private Long ratingId;
         private Long prodId;
-        private MultipartFile file;
+        private UserDto.Attachment file;
         private String location;
+    }
+    @Data
+    @AllArgsConstructor
+    public static class Attachment{
+        private String filename;
+        private String contentType;
+        private byte[] content;
     }
 }

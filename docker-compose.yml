@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+    restart: unless-stopped
+
+  ecom-backend:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+    container_name: ecom-backend
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - rabbitmq
+    restart: unless-stopped

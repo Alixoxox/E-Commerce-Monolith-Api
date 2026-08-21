@@ -50,8 +50,6 @@ public class UserService {
     private RatingRepo rp;
     @Autowired
     private JWTService jwtService;
-     @Autowired
-    private EmailService emailService;
     @Autowired
     private buildRecieptHtml buildRecieptHtml;
     @Autowired

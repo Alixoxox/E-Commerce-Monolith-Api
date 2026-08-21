@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProdService {
@@ -50,10 +49,10 @@ public class ProdService {
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
-    public void createProduct(productDTOs.ProductDto dto, MultipartFile image) {
+    public void createProduct(productDTOs.ProductDto dto, UserDto.Attachment image) {
         Boolean key=false;
         Product product = new Product();
-        if(!image.isEmpty()){
+        if(image != null){
             UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
             rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg); //todo
             key=true;
@@ -64,10 +63,10 @@ public class ProdService {
     @SneakyThrows
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
-    public void updateProduct(productDTOs.ProductDto dto, MultipartFile image) {
+    public void updateProduct(productDTOs.ProductDto dto, UserDto.Attachment image) {
         Product product = PR.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Product Not Found"));
         Boolean key = false;
-        if(image != null && !image.isEmpty()){
+        if(image != null){
             UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
             rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg);
             key = true;

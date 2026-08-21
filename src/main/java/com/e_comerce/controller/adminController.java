@@ -100,7 +100,11 @@ public class adminController {
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
             if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
-            PS.createProduct(dto,image);
+            UserDto.Attachment newImg= null;
+            if(image!=null && !image.isEmpty()){
+                newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
+            }
+            PS.createProduct(dto,newImg);
             return ResponseEntity.status(HttpStatus.CREATED).body("Product "+dto.getTitle()+" Created");
         }catch (Exception e){
             e.printStackTrace();
@@ -114,7 +118,11 @@ public class adminController {
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
             if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
-            PS.updateProduct(dto,image);
+            UserDto.Attachment newImg= null;
+            if(image!=null && !image.isEmpty()){
+                newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
+            }
+            PS.updateProduct(dto,newImg);
             return ResponseEntity.ok("Product "+dto.getTitle()+"Edited");
         }catch (Exception e){
             e.printStackTrace();
