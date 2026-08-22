@@ -50,15 +50,13 @@ public class ProdService {
     @Transactional
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
     public void createProduct(productDTOs.ProductDto dto, UserDto.Attachment image) {
-        Boolean key=false;
-        Product product = new Product();
-        if(image != null){
-            UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
-            rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg); //todo
-            key=true;
-        }
-        Product newProd= apply(product, dto,key);
-        PR.save(newProd);
+    Product product = new Product();
+    Product newProd = apply(product, dto, image != null);
+    Product savedProduct = PR.save(newProd);
+    if (image != null) {
+        UserDto.rateImg rateImg = new UserDto.rateImg(null,savedProduct.getId(),image,"products/");
+        rabbitTemplate.convertAndSend(IMAGE_QUEUE, rateImg);
+    }
     }
     @SneakyThrows
     @Transactional
@@ -144,10 +142,10 @@ public class ProdService {
     );
     }
     String convertImg(String key){
-        if(key.startsWith("http")){ // some may be http or https
+        if(key==null || key.startsWith("http")){ // some may be http or https
             return key;
         }
         // this also allows external Links to be viewable
-        return key !=null ? s3Service.getPresignedUrl(key) : key;
+        return s3Service.getPresignedUrl(key);
     }
 }

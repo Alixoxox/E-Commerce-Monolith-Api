@@ -138,16 +138,25 @@ public class UserService {
     @Cacheable("prodFeedback")
     public List<OrderDto.FeedbackDto> GetProductFeedback(Long productId) {
         return rp.findByProductIdOrderByCreatedAtDesc(productId).stream()
-                .map(r -> new OrderDto.FeedbackDto(
-                        r.getId(),
-                        r.getValue(),
-                        r.getComment(),
-                        r.getCreatedAt(),
-                        r.getFeedbackImage() !=null ?
-                        s3Service.getPresignedUrl(r.getFeedbackImage())
-                        : null,
-                        r.getUser().getName(),
-                        r.getUser().getId()))
+                .map(r -> {
+                    // 1. Evaluate the image URL and store it in a variable
+                    String imageUrl = r.getFeedbackImage() != null ?
+                            s3Service.getPresignedUrl(r.getFeedbackImage()) : null;
+
+                    // 2. Print the image URL to your console
+                    System.out.println("Feedback Image URL: " + imageUrl);
+
+                    // 3. Return the DTO using the variable
+                    return new OrderDto.FeedbackDto(
+                            r.getId(),
+                            r.getValue(),
+                            r.getComment(),
+                            r.getCreatedAt(),
+                            imageUrl, // Use the variable here
+                            r.getUser().getName(),
+                            r.getUser().getId()
+                    );
+                })
                 .toList();
     }
     @SneakyThrows

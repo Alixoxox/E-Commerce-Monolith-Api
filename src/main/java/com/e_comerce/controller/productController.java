@@ -1,7 +1,9 @@
 package com.e_comerce.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
+import com.e_comerce.DTO.OrderDto;
 import com.e_comerce.DTO.productDTOs;
 import com.e_comerce.model.enums.Category;
 import com.e_comerce.service.ProdService;
@@ -67,7 +69,10 @@ public class productController {
     @GetMapping("ratings/{productId}")
     public Object FetchProductFeedback(@PathVariable Long productId){
         try{
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(us.GetProductFeedback(productId));
+            System.out.println("Get ratings");
+            List<OrderDto.FeedbackDto> x= us.GetProductFeedback(productId);
+            System.out.println(x);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(x);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

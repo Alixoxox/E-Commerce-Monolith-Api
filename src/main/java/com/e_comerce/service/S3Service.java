@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -48,13 +49,15 @@ public class S3Service {
     @Value("${aws.region}")
     private String region;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @Transactional
     @RabbitListener(queues = IMAGE_QUEUE)
     public void uploadImage(UserDto.rateImg payload) throws IOException {
-
+        System.out.println("commencing push");
 //        type -> "products/" :"user-review/";
         String key = payload.getLocation() + UUID.randomUUID() + "-" + payload.getFile().getFilename();
-
         byte[] bytes = payload.getFile().getContent();
         String contentType = payload.getFile().getContentType();
         if (contentType != null && contentType.startsWith("image/")) {
@@ -73,13 +76,20 @@ public class S3Service {
 
         s3Client.putObject(request, RequestBody.fromBytes(bytes));
 
-        // its a rating / feedback img
-        if(payload.getRatingId()!=null ){
-            ratingRepo.updateFeedbackImage(payload.getRatingId(),key);
-        }else{
-            // must be for product
+
+        if (payload.getRatingId() == null) {
+            // must be for product Img uploaded by admin they don't have rating but only productId
             productRepo.updateImage(payload.getProdId(), key);
-        }
+            Long prodId = Long.valueOf(payload.getProdId().toString());
+            cacheManager.getCache("products").evict(prodId);
+
+        } else {
+            // must be user adding review since only they have rating and productId
+            ratingRepo.updateFeedbackImage(payload.getRatingId(), key);
+                    cacheManager.getCache("prodFeedback").evict(payload.getProdId());
+                    cacheManager.getCache("prodRating").evict(payload.getProdId());
+                }
+
     }
 
     private record ResizedImage(byte[] bytes, String contentType) {}

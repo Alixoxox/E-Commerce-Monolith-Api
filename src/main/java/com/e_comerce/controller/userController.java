@@ -10,6 +10,7 @@ import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.model.rating;
 import com.e_comerce.model.wishlist;
+import com.e_comerce.repository.RatingRepo;
 import com.e_comerce.service.EmailService;
 import com.e_comerce.service.S3Service;
 import com.e_comerce.service.UserService;
@@ -84,11 +85,14 @@ public class userController {
             @RequestPart("rating") OrderDto.RateProd rp,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
+            System.out.println(rp);
+            System.out.println(image);
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
+            System.out.println(rate);
             if(image!=null && !image.isEmpty()){
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
-                UserDto.rateImg r= new UserDto.rateImg(rate.getId(), null, newImg,"user-review/");
+                UserDto.rateImg r= new UserDto.rateImg(rate.getId(), rate.getProduct().getId(), newImg,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
             }
             return ResponseEntity.status(HttpStatus.CREATED).body("Your Response Has been Recorded");
@@ -96,6 +100,10 @@ public class userController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @Autowired
+    private RatingRepo ratingRepo;
+
     @PutMapping("complete/rating/{ratingId}")
     public Object CompleteProductRate(
             @RequestPart("rating") OrderDto.EditRateProd rp,
@@ -106,8 +114,9 @@ public class userController {
              throw new RuntimeException("There Should be atLeast One Change");
             }
             if(image != null && !image.isEmpty()){
+                Long productId= ratingRepo.findProductIdByRatingId(ratingId);
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
-                UserDto.rateImg r= new UserDto.rateImg(ratingId, null, newImg,"user-review/");
+                UserDto.rateImg r= new UserDto.rateImg(ratingId, productId, newImg,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
             }
             US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null);
