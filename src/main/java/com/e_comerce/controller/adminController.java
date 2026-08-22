@@ -9,6 +9,7 @@ import com.e_comerce.service.AdminSevice;
 import com.e_comerce.service.OrderService;
 import com.e_comerce.service.ProdService;
 import com.e_comerce.service.UserService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -110,7 +111,6 @@ public class adminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("product/edit/{productId}")
     public Object UpdateProduct(@RequestPart("product") productDTOs.ProductDto dto,
@@ -120,6 +120,8 @@ public class adminController {
             if(image!=null && !image.isEmpty()){
                 newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
             }
+            System.out.println(dto);
+            System.out.println(newImg);
             PS.updateProduct(dto,newImg);
             return ResponseEntity.ok("Product "+dto.getTitle()+"Edited");
         }catch (Exception e){
@@ -132,9 +134,11 @@ public class adminController {
     @DeleteMapping("product/del/{productId}")
     public Object DeleteProduct(@PathVariable Long productId){
         try{
+            System.out.println(productId);
             PS.deleteProduct(productId);
             return ResponseEntity.ok().build();
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

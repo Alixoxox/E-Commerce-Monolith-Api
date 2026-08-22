@@ -66,7 +66,10 @@ public class ProdService {
         Boolean key = false;
         if(image != null){
             UserDto.rateImg rateImg=new UserDto.rateImg(null, product.getId(), image,"products/");
-            rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg);
+            if(product.getImage()!=null && product.getImage().startsWith("products/")){
+                rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,product.getImage()); //delete older image from s3 bucket
+            }
+            rabbitTemplate.convertAndSend(IMAGE_QUEUE,rateImg); // put new img
             key = true;
         }
         Product newProd= apply(product, dto ,key);
@@ -76,8 +79,11 @@ public class ProdService {
     @CacheEvict(value = "ProdsByCategory", allEntries = true)
     public void deleteProduct(Long id) {
         Product prod= PR.findById(id).orElseThrow(()-> new RuntimeException("Product Not Found"));
-        rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,prod.getImage());
+        if(prod.getImage()!=null && prod.getImage().startsWith("products/")) {
+            rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE, prod.getImage());
+        }
         PR.deleteById(id);
+        System.out.println(prod);
     }
     @Cacheable(value="ProdsByCategory",key="#cat")
     public List<Product> ProdsByCategory(Category cat){

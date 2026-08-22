@@ -18,7 +18,5 @@ public interface RatingRepo extends JpaRepository<rating, Long> {
 
     List<rating> findByProductIdOrderByCreatedAtDesc(Long productId);
 
-    @Query("SELECT r.product.id FROM rating r WHERE r.id = :ratingId")
-    Long findProductIdByRatingId(@Param("ratingId") Long ratingId);
 
 }

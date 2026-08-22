@@ -123,6 +123,9 @@ public class S3Service {
     }
     @RabbitListener(queues = IMAGE_DEL_QUEUE)
     public void deleteImageByUrl(String key) {
+        if (key == null || key.isBlank()) {
+        return;
+    }
          DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)

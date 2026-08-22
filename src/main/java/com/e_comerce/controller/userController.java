@@ -1,7 +1,6 @@
 package com.e_comerce.controller;
 
-import static com.e_comerce.config.RedisAndRabbitConfig.EMAIL_QUEUE;
-import static com.e_comerce.config.RedisAndRabbitConfig.IMAGE_QUEUE;
+import static com.e_comerce.config.RedisAndRabbitConfig.*;
 
 import java.util.List;
 
@@ -117,10 +116,13 @@ public class userController {
             if (rp.getComment()!=null && rp.getComment().length() > 255) throw new RuntimeException("For Now Description is limited to max length 255");
 
             if(image != null && !image.isEmpty()){
-                Long productId= ratingRepo.findProductIdByRatingId(ratingId);
+                rating rate= ratingRepo.findById(ratingId).orElseThrow(() -> new RuntimeException("Feedback not found"));
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
-                UserDto.rateImg r= new UserDto.rateImg(ratingId, productId, newImg,"user-review/");
-                rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);
+                UserDto.rateImg r= new UserDto.rateImg(ratingId, rate.getProduct().getId(), newImg,"user-review/");
+                if(rate.getFeedbackImage()!=null && rate.getFeedbackImage().startsWith("user-review/")){
+                    rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,rate.getFeedbackImage()); // delete prev image
+                }
+                rabbitTemplate.convertAndSend(IMAGE_QUEUE,r); // store newer image
             }
             US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null);
             return ResponseEntity.status(HttpStatus.CREATED).body("The Product has now been altered");

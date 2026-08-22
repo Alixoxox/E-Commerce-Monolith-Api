@@ -42,7 +42,7 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     Set<String> findExistingTitles(@Param("titles") Set<String> titles);
 
     @Modifying
-    @Query("UPDATE Product p SET p.image = :key WHERE p.id = :ratingId")
+    @Query("UPDATE Product p SET p.image = :key WHERE p.id = :productId")
     void updateImage(@Param("productId") Long productId, @Param("key") String key);
 
 }

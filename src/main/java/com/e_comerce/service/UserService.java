@@ -166,12 +166,12 @@ public class UserService {
         if (x.isPresent()) {
             rating rating = x.get();
             Long productId= rating.getProduct().getId();
-            if (rating.getFeedbackImage() != null) {
+            if (rating.getFeedbackImage() != null && rating.getFeedbackImage().startsWith("user-review/")) {
                 rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,rating.getFeedbackImage());
             }
             rp.deleteById(ratingId);
-             cacheManager.getCache("prodRating").evict(productId);
-             cacheManager.getCache("prodFeedback").evict(productId);
+            cacheManager.getCache("prodRating").evict(productId);
+            cacheManager.getCache("prodFeedback").evict(productId);
             return true;
         }
         return false;
