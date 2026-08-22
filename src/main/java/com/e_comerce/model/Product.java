@@ -23,6 +23,7 @@ public class Product {
     @Column(unique = true)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
     @Enumerated(EnumType.STRING)
     private Category category;

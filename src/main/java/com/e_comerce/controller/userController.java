@@ -87,6 +87,7 @@ public class userController {
         try{
             System.out.println(rp);
             System.out.println(image);
+            if (rp.getComment().isEmpty() && rp.getComment().length() > 255) throw new RuntimeException("For Now Description is limited to max length 255");
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
             System.out.println(rate);
@@ -113,6 +114,8 @@ public class userController {
             if (rp.getRating() == null || rp.getComment() == null || rp.getComment().isBlank() || image == null || image.isEmpty()) {
              throw new RuntimeException("There Should be atLeast One Change");
             }
+            if (rp.getComment()!=null && rp.getComment().length() > 255) throw new RuntimeException("For Now Description is limited to max length 255");
+
             if(image != null && !image.isEmpty()){
                 Long productId= ratingRepo.findProductIdByRatingId(ratingId);
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());

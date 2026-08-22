@@ -99,7 +99,6 @@ public class adminController {
     public Object CreateProduct(@RequestPart("product") productDTOs.ProductDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
-            if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
             UserDto.Attachment newImg= null;
             if(image!=null && !image.isEmpty()){
                 newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
@@ -117,7 +116,6 @@ public class adminController {
     public Object UpdateProduct(@RequestPart("product") productDTOs.ProductDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
-            if (dto.getDescription().length() > 254) throw new RuntimeException("For Now Description is limited to max length 255");
             UserDto.Attachment newImg= null;
             if(image!=null && !image.isEmpty()){
                 newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());

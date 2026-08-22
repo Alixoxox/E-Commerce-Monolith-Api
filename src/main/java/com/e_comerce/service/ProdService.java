@@ -96,7 +96,9 @@ public class ProdService {
             product.setImage(null);
         } else {
             //image link
-            product.setImage(dto.getImage());
+            if(!dto.getImage().contains("https://aws-s3")){
+                product.setImage(dto.getImage());
+            }
         }
         product.setStock(dto.getStock());
         product.setPrice(dto.getPrice());
