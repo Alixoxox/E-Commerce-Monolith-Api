@@ -143,19 +143,8 @@ public class UserService {
                     String imageUrl = r.getFeedbackImage() != null ?
                             s3Service.getPresignedUrl(r.getFeedbackImage()) : null;
 
-                    // 2. Print the image URL to your console
-                    System.out.println("Feedback Image URL: " + imageUrl);
-
-                    // 3. Return the DTO using the variable
-                    return new OrderDto.FeedbackDto(
-                            r.getId(),
-                            r.getValue(),
-                            r.getComment(),
-                            r.getCreatedAt(),
-                            imageUrl, // Use the variable here
-                            r.getUser().getName(),
-                            r.getUser().getId()
-                    );
+                    // 2. Return the DTO using the variable
+                    return new OrderDto.FeedbackDto(r.getId(),r.getValue(), r.getComment(), r.getCreatedAt(), imageUrl,r.getUser().getName(),r.getUser().getId() );
                 })
                 .toList();
     }

@@ -44,6 +44,7 @@ public class productController {
         try{
             return ResponseEntity.accepted().body(PS.getOneProd(productId));
         }catch (Exception err){
+            err.printStackTrace();
             return ResponseEntity.badRequest().body(err.getMessage());
         }
     }
@@ -54,6 +55,7 @@ public class productController {
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(PS.ProdsByCategory(category));
         }catch(Exception e){
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -62,6 +64,7 @@ public class productController {
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(us.GetProdRating(productId));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -69,11 +72,10 @@ public class productController {
     @GetMapping("ratings/{productId}")
     public Object FetchProductFeedback(@PathVariable Long productId){
         try{
-            System.out.println("Get ratings");
             List<OrderDto.FeedbackDto> x= us.GetProductFeedback(productId);
-            System.out.println(x);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(x);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

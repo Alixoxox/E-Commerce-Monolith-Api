@@ -93,6 +93,7 @@ public class UserDto {
     }
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Attachment{
         private String filename;
         private String contentType;
