@@ -83,7 +83,6 @@ public class ProdService {
             rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE, prod.getImage());
         }
         PR.deleteById(id);
-        System.out.println(prod);
     }
     @Cacheable(value="ProdsByCategory",key="#cat")
     public List<Product> ProdsByCategory(Category cat){

@@ -46,16 +46,12 @@ public class S3Service {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${aws.region}")
-    private String region;
-
     @Autowired
     private CacheManager cacheManager;
 
     @Transactional
     @RabbitListener(queues = IMAGE_QUEUE)
     public void uploadImage(UserDto.rateImg payload) throws IOException {
-        System.out.println("commencing push");
 //        type -> "products/" :"user-review/";
         String key = payload.getLocation() + UUID.randomUUID() + "-" + payload.getFile().getFilename();
         byte[] bytes = payload.getFile().getContent();

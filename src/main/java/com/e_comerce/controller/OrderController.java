@@ -32,6 +32,7 @@ public class OrderController {
         List<UserDto.UserOrderHist> History= OS.GetHistory(userId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(History);
     } catch (Exception e) {
+        e.printStackTrace();
     return ResponseEntity.badRequest().body(e);
     }
     }
@@ -42,6 +43,7 @@ public class OrderController {
         List<UserDto.UserOrderItemHist> History= OS.OrderHistoryProducts(HistoryNo);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(History);
     } catch (Exception e) {
+        e.printStackTrace();
     return ResponseEntity.badRequest().body("History Of Products Bought could not Be Found");
         }
     }
@@ -56,6 +58,7 @@ public class OrderController {
             us.SendOrderReciept(history.getId(),false);
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
             } catch (Exception e) {
+            e.printStackTrace();
            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

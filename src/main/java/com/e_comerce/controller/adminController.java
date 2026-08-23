@@ -37,6 +37,7 @@ public class adminController {
         try {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(US.FetchUserData());
         }catch(Exception err){
+            err.printStackTrace();
             return ResponseEntity.badRequest();
         }
     }
@@ -82,6 +83,7 @@ public class adminController {
             US.SendOrderReciept(orderId,true);
             return ResponseEntity.ok(order);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -91,6 +93,7 @@ public class adminController {
         try{
             return ResponseEntity.ok(US.GetUserCount());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -120,8 +123,6 @@ public class adminController {
             if(image!=null && !image.isEmpty()){
                 newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
             }
-            System.out.println(dto);
-            System.out.println(newImg);
             PS.updateProduct(dto,newImg);
             return ResponseEntity.ok("Product "+dto.getTitle()+"Edited");
         }catch (Exception e){
@@ -134,7 +135,6 @@ public class adminController {
     @DeleteMapping("product/del/{productId}")
     public Object DeleteProduct(@PathVariable Long productId){
         try{
-            System.out.println(productId);
             PS.deleteProduct(productId);
             return ResponseEntity.ok().build();
         }catch (Exception e){

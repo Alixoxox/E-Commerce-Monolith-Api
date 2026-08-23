@@ -31,8 +31,6 @@ public class userController {
     @Autowired
     private WishService ws;
     @Autowired
-    private S3Service ss;
-    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @PostMapping("auth/register")
@@ -41,6 +39,7 @@ public class userController {
             Object UDR = US.CreateUser(UR,UserRole.USER);
             return ResponseEntity.status(HttpStatus.CREATED).body(UDR);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -51,7 +50,7 @@ public class userController {
             Object data = US.LoginUser(UDLog, UserRole.USER);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(data);
         } catch (Exception e) {
-
+        e.printStackTrace();
         return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -63,6 +62,7 @@ public class userController {
             ws.MarkWish(userId, productId);
             return ResponseEntity.status(HttpStatus.CREATED).body("Product Marked");
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
@@ -75,6 +75,7 @@ public class userController {
             List<wishlist> wishes= ws.GetWishes(userId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(wishes);
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Something went wrong while Marking.\nPlease Try Again Later");
         }
     }
@@ -84,12 +85,9 @@ public class userController {
             @RequestPart("rating") OrderDto.RateProd rp,
             @RequestPart(value = "image", required = false) MultipartFile image){
         try{
-            System.out.println(rp);
-            System.out.println(image);
             if (rp.getComment().isEmpty() && rp.getComment().length() > 255) throw new RuntimeException("For Now Description is limited to max length 255");
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
-            System.out.println(rate);
             if(image!=null && !image.isEmpty()){
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
                 UserDto.rateImg r= new UserDto.rateImg(rate.getId(), rate.getProduct().getId(), newImg,"user-review/");
@@ -97,6 +95,7 @@ public class userController {
             }
             return ResponseEntity.status(HttpStatus.CREATED).body("Your Response Has been Recorded");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -127,6 +126,7 @@ public class userController {
             US.EditRateProduct(ratingId,rp.getRating(),rp.getComment(),null);
             return ResponseEntity.status(HttpStatus.CREATED).body("The Product has now been altered");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -143,6 +143,7 @@ public class userController {
             }
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(s);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
