@@ -14,8 +14,6 @@ import com.e_comerce.DTO.UserDto;
 import com.e_comerce.model.PastOrders;
 import com.e_comerce.model.Product;
 import com.e_comerce.model.User;
-import com.e_comerce.model.enums.Category;
-import com.e_comerce.model.enums.OrderStatus;
 import com.e_comerce.model.enums.UserRole;
 import com.e_comerce.model.rating;
 import com.e_comerce.repository.PastOrderRepo;
@@ -25,14 +23,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +65,8 @@ public class UserService {
     }
     @Caching(evict={@CacheEvict("UserCount"), @CacheEvict("adminUsers")})
     public Object CreateUser(UserDto.Request UDR,UserRole role) {
-        //instantiate new User
+        if(role==null) throw new IllegalArgumentException("Role is Required");
+        if (UDR.getEmail() == null || UDR.getEmail().isBlank()) throw new IllegalArgumentException("Email is required");
         try {
             User userM = new User();
             userM.setName(UDR.getName());
@@ -82,11 +79,13 @@ public class UserService {
             String token = jwtService.generateToken(userM.getEmail(),user.getId(),role);
             return Map.of("Token",token,"UserData",summary);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Email already exists.\nTry Another One!");
         }
     }
     @SneakyThrows
     public Object LoginUser(UserDto.Login UDR, UserRole userRole) {
+    if(userRole==null || UDR == null) throw new IllegalArgumentException("Login Mail/Pass and Role required");
     User user = UR.findByEmail(UDR.getEmail())
             .orElseThrow(() -> new RuntimeException("Email not found"));
     if(user.getUserRole() != userRole){
@@ -107,6 +106,8 @@ public class UserService {
             @CacheEvict(value = "prodFeedback", key = "#productId")
     })
     public rating RateProduct(Long userId, Long productId, Integer stars, String Comment, String Url){
+        if(userId==null || productId==null) throw new IllegalArgumentException("To Rate You have to be User and select Product");
+        if(stars==null || stars > 5 || stars < 1) throw new IllegalArgumentException("You have to rate between 1-5");
         User user=entityManager.getReference(User.class,userId);
         Product prod=entityManager.getReference(Product.class,productId);
         rating rate= new rating(null,stars,Comment,LocalDateTime.now(),Url,user,prod);
@@ -158,7 +159,7 @@ public class UserService {
             if (rating.getFeedbackImage() != null && rating.getFeedbackImage().startsWith("user-review/")) {
                 rabbitTemplate.convertAndSend(IMAGE_DEL_QUEUE,rating.getFeedbackImage());
             }
-            rp.deleteById(ratingId);
+            rp.delete(rating);
             cacheManager.getCache("prodRating").evict(productId);
             cacheManager.getCache("prodFeedback").evict(productId);
             return true;

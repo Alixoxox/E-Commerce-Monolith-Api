@@ -24,12 +24,13 @@ import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
+    // add IllegalArgumentExceptions for dependant ones
     @Mock
-    ProductRepo productRepo;
+    private ProductRepo productRepo;
     @Mock
-    RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
     @InjectMocks
-    ProdService productService;
+    private ProdService productService;
 
     @Test
     void createProductWithImage(){
@@ -61,8 +62,6 @@ public class ProductServiceTest {
         verify(productRepo).save(any(Product.class));
         // when no img verify this is not called
         verify(rabbitTemplate, never()).convertAndSend(eq(IMAGE_QUEUE), any(UserDto.rateImg.class));
-//        verify(productRepo,times(1)).deleteById(1L);
-
     }
 @Test
 void getProductsWithPriceAsc() {
@@ -142,7 +141,7 @@ void getProductsWithPriceAsc() {
        Product product = new Product();
        productDTOs.ProductDto dto = new productDTOs.ProductDto();
        Product result = (Product) x.invoke(productService,product,dto,true);
-        assertNull(result.getImage());
+       assertNull(result.getImage());
     }
 
      @Test
