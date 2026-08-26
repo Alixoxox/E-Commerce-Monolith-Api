@@ -19,14 +19,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run tests
-        run: mvn test
+      - name: Run Tests with Test Profile
+        run: mvn clean test -Dspring.profiles.active=test
 
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-      
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -45,7 +45,7 @@ jobs:
 
       - name: Build and push image to ECR
         run: |
-          docker build -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest .
+          docker build --build-arg MAVEN_OPTS="-DskipTests" -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest .
           docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: Deploy to EC2 via Docker Compose
