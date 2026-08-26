@@ -43,7 +43,7 @@ public class ProdService {
         }
         Pageable pageable = PageRequest.of(page, size, s);
         Page<productDTOs.ProductSummary> products= PR.getSummary(pageable, search == null ? "" : search, category);
-         return products.map(p -> convertToViewableImage(p));
+        return products.map(p -> convertToViewableImage(p));
     }
 
     @SneakyThrows
@@ -101,7 +101,7 @@ public class ProdService {
             product.setImage(null);
         } else {
             //image link
-            if(!dto.getImage().contains("https://aws-s3")){
+            if(dto.getImage()!=null && !dto.getImage().contains("https://aws-s3")){
                 product.setImage(dto.getImage());
             }
         }

@@ -27,6 +27,9 @@ public class WishService {
     @Transactional
     @CacheEvict(value="Wishlist",key="#userId")
     public void MarkWish(Long userId,Long productId){
+        if (userId == null || productId == null) {
+        throw new IllegalArgumentException("User ID and Product ID cannot be null");
+        }
         if (wishRepo.existsByUser_IdAndProduct_Id(userId, productId)) {
             wishRepo.deleteByUser_IdAndProduct_Id(userId, productId);
             return;
@@ -39,6 +42,9 @@ public class WishService {
     @SneakyThrows
     @Cacheable(value = "Wishlist",key = "#UserId")
     public List<wishlist> GetWishes(Long UserId){
+        if (UserId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
         List<wishlist> wishing =wishRepo.GetWishes(UserId);
         return wishing;
     }
