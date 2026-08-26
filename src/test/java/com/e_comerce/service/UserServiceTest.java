@@ -206,5 +206,5 @@ void removeRatingWithAWSImage() {
 
         verify(ratingRepo, never()).delete(any(rating.class));
         verify(rabbitTemplate, never()).convertAndSend(anyString(), anyString());
-}
+    }
 }

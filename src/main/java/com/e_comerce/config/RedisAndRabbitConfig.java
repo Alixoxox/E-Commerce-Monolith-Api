@@ -31,7 +31,7 @@ public class RedisAndRabbitConfig {
     // 1-A. Initialize Email Queue
     @Bean
     public Queue emailQueue(){
-        // true = durable queue (survives server restarts)
+        // atrue = durable queue (survives server restarts)
         return new Queue(EMAIL_QUEUE, true);
     }
     // 1-B. Initialize Image Queue

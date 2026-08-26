@@ -15,42 +15,42 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    @Autowired
-    private JavaMailSender mailSender;
+//    @Autowired
+//    private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String mailUsername;
+//    @Value("${spring.mail.username}")
+//    private String mailUsername;
 
     @RabbitListener(queues = EMAIL_QUEUE)
     public void consumeMessage(UserDto.supportMsg payload) throws MessagingException {
-        if (payload.getIsHtml()) {
-            sendHtmlEmail(payload);
-        } else {
-       sendSupportMessage(payload);
-    }
+//        if (payload.getIsHtml()) {
+//            sendHtmlEmail(payload);
+//        } else {
+//       sendSupportMessage(payload);
+//    }
     }
 
     private void sendHtmlEmail(UserDto.supportMsg mailItems) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setFrom(mailUsername);
-            helper.setTo(mailItems.getUserEmail());
-            helper.setSubject(mailItems.getSubject());
-            helper.setText(mailItems.getMessage(), true);
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email", e);
-        }
+//        try {
+//            MimeMessage message = mailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+//            helper.setFrom(mailUsername);
+//            helper.setTo(mailItems.getUserEmail());
+//            helper.setSubject(mailItems.getSubject());
+//            helper.setText(mailItems.getMessage(), true);
+//            mailSender.send(message);
+//        } catch (MessagingException e) {
+//            throw new RuntimeException("Failed to send email", e);
+//        }
     }
     private void sendSupportMessage(UserDto.supportMsg msg) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(mailUsername);       // Gmail forces this anyway, so set it explicitly
-        message.setTo(mailUsername);         // lands in your inbox
-        message.setReplyTo(msg.getUserEmail());       // hitting reply goes to the user
-        message.setSubject("[Support] " + msg.getSubject());
-        message.setText(msg.getMessage());
-        mailSender.send(message);
-    }
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setFrom(mailUsername);       // Gmail forces this anyway, so set it explicitly
+//        message.setTo(mailUsername);         // lands in your inbox
+//        message.setReplyTo(msg.getUserEmail());       // hitting reply goes to the user
+//        message.setSubject("[Support] " + msg.getSubject());
+//        message.setText(msg.getMessage());
+//        mailSender.send(message);
 
+    }
 }

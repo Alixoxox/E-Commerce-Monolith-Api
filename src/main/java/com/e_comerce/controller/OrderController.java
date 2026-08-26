@@ -51,11 +51,12 @@ public class OrderController {
     @PostMapping("purchase")
     public Object BuyItems(@RequestBody OrderDto.Checkout prodsBuy){
         try{
+            System.out.println(prodsBuy);
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = entityManager.getReference(User.class,userId);
             PastOrders history= OS.createOrder(prodsBuy,user);
             // fire and forget mail to customer
-            us.SendOrderReciept(history.getId(),false);
+//            us.SendOrderReciept(history.getId(),false);
             return ResponseEntity.status(HttpStatus.CREATED).body(history);
             } catch (Exception e) {
             e.printStackTrace();

@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminSeeder implements CommandLineRunner {
 
-    @Value("${spring.mail.adminMail}")
-    private String adminMail;
-
-    @Value("${spring.mail.adminPass}")
-    private String adminPas;
+//    @Value("${spring.mail.adminMail}")
+//    private String adminMail;
+//
+//    @Value("${spring.mail.adminPass}")
+//    private String adminPas;
 
     @Autowired
     private UserRepo userRepo;
@@ -28,10 +28,10 @@ public class AdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-    if(!userRepo.existsByEmail(adminMail)){
-        String hashedPass=passwordEncoder.encode(adminPas);
-        User user= new User(null,null,adminMail,hashedPass, LocalDateTime.now(), UserRole.ADMIN,null,null,null);
-        userRepo.save(user);
-    }
+//    if(!userRepo.existsByEmail(adminMail)){
+//        String hashedPass=passwordEncoder.encode(adminPas);
+//        User user= new User(null,null,adminMail,hashedPass, LocalDateTime.now(), UserRole.ADMIN,null,null,null);
+//        userRepo.save(user);
+//    }
     }
 }
