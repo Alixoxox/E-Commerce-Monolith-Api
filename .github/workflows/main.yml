@@ -1,9 +1,10 @@
 name: CI/CD Pipeline
   
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main
+      - '**'
 
 jobs:
   build:
@@ -18,11 +19,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Run Maven Tests
+        run: mvn clean test -Dspring.profiles.active=test
+
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-      
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
