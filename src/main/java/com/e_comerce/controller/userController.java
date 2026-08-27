@@ -88,7 +88,7 @@ public class userController {
             if (rp.getComment().isEmpty() && rp.getComment().length() > 255) throw new RuntimeException("For Now Description is limited to max length 255");
             Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             rating rate= US.RateProduct(userId, rp.getProductId(),rp.getRating(),rp.getComment(),null);
-            if(image!=null && !image.isEmpty()){
+            if(image!=null && !image.isEmpty() && rate!=null){
                 UserDto.Attachment newImg = new UserDto.Attachment(image.getOriginalFilename(), image.getContentType(), image.getBytes());
                 UserDto.rateImg r= new UserDto.rateImg(rate.getId(), rate.getProduct().getId(), newImg,"user-review/");
                 rabbitTemplate.convertAndSend(IMAGE_QUEUE,r);

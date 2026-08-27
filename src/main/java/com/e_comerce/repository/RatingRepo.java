@@ -18,5 +18,5 @@ public interface RatingRepo extends JpaRepository<rating, Long> {
 
     List<rating> findByProductIdOrderByCreatedAtDesc(Long productId);
 
-
+    Boolean existsByUserIdAndProductId(Long userId, Long productId );
 }

@@ -108,6 +108,9 @@ public class UserService {
     public rating RateProduct(Long userId, Long productId, Integer stars, String Comment, String Url){
         if(userId==null || productId==null) throw new IllegalArgumentException("To Rate You have to be User and select Product");
         if(stars==null || stars > 5 || stars < 1) throw new IllegalArgumentException("You have to rate between 1-5");
+        if (rp.existsByUserIdAndProductId(userId, productId)) {
+        return null;
+        }
         User user=entityManager.getReference(User.class,userId);
         Product prod=entityManager.getReference(Product.class,productId);
         rating rate= new rating(null,stars,Comment,LocalDateTime.now(),Url,user,prod);
