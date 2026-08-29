@@ -1,6 +1,6 @@
 <div align="center">
 
-# E-Commerce Monolith API
+Mercurion — Modular Commerce Platform
 
 Spring Boot monolith for an e-commerce platform — catalog, orders, ratings, wishlists, admin operations, and asynchronous email/image processing behind a stateless JWT API.
 
