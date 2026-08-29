@@ -75,7 +75,7 @@ Services   ─────────────────▶ Redis         
   ▼
 Spring Data JPA / Hibernate ─▶ PostgreSQL
 
-Queue consumers (in-process):
+Queue consumers:
   EmailService  → Gmail SMTP
   S3Service     → AWS S3 (resize / upload / delete / presign)
 ```
@@ -354,7 +354,6 @@ Known gaps, visible directly in the code:
 - **Order-flow test coverage** — `OrderService.java` carries a `// TODO: ORDER TESTS` marker; checkout/stock-decrement has no dedicated unit tests yet.
 - **Price-drop wishlist alerts** — flagged in `userController.java` as an optional, unimplemented feature.
 - **API documentation** — no OpenAPI/Swagger; the endpoint surface isn't self-discoverable.
-- **Branch-gated deployment** — CI/CD currently deploys on pushes to any branch (`branches: '**'`), not just `main`.
 - **Load-test against a scaled deployment** — current numbers are from one local, unscaled instance (see [Limitations](#load-testing-jmeter)); re-running against a horizontally/vertically scaled deployment would give a realistic production ceiling instead of a single-node one.
 
 ## Author
